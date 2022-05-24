@@ -1,0 +1,10 @@
+# Removes blank line between shell prompts
+add_newline = false
+
+# Sets up a single-line prompt with right-hand information
+format = """
+$username\
+$hostname\
+$directory\
+$character"""
+right_format = """$all"""
