@@ -4,8 +4,6 @@ A repository of configuration files for ZSH, Vim, and more.
 ## Required packages
 
 1. `zsh`
-2. `oh-my-zsh`
-3. `antigen` or `zsh-antigen` (ZSH plugin manager)
 4. `bat` (`cat` alternative)
 5. `prettyping` (`ping` alternative)
 6. `neovim` (`vim` alternative)
