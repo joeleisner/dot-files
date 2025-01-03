@@ -7,7 +7,11 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
 export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_RUNTIME_DIR=$(_macos "$(getconf DARWIN_USER_TEMP_DIR)" "/run/user/$UID")
+if [[ "$OSTYPE" == darwin* ]]; then
+	export XDG_RUNTIME_DIR="$(getconf DARWIN_USER_TEMP_DIR)"
+else
+	export XDG_RUNTIME_DIR="/run/user/$UID"
+fi
 
 # XDG fixes
 export DOCKER_CONFIG="$XDG_CONFIG_HOME"/docker
@@ -121,14 +125,30 @@ fi
 alias cp="cp -iv" # Safe cp
 alias mv="mv -iv" # Safe mv
 alias mkcd="take" # Create & change directoriesx
+[[ -x "$(command -v wget)" ]] && alias wget=wget --hsts-file="$XDG_DATA_HOME/wget-hsts"
 [[ -x "$(command -v nvim)" ]] && alias vim="nvim" # neovim > vim
 [[ -x "$(command -v yt-dlp)" ]] && alias ytdl="yt-dlp" # yt-dlp shorthand
 [[ -x "$(command -v gdate)" ]] && alias date="gdate" # gdate > date
 
+if [[ "$OSTYPE" == linux* ]]; then
+	# If in WSL...
+	if [[ -v WSL_DISTRO_NAME ]]; then
+		alias open="explorer.exe $@" # Open things in File Explorer 
+		alias wsl="wsl.exe" # WSL shorthand
+	# If in any other distro...
+	else
+		alias open="xdg-open ." # Open things in the configured file manager
+	fi
+fi
+
 # Shell integrations
 [[ -x "$FZF_EXISTS" ]] && eval "$(fzf --zsh)"
 [[ -x "$(command -v zoxide)" ]] && eval "$(zoxide init --cmd cd zsh)" # z > cd
-[[ -x "$(command -v brew)" ]] && eval "$(brew shellenv)"
+if [ -d "/home/linuxbrew" ]; then
+	eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+else
+	[[ -x "$(command -v brew)" ]] && eval "$(brew shellenv)"
+fi
 
 # Load the starship prompt
 eval "$(starship init zsh)"
