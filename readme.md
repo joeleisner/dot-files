@@ -10,11 +10,7 @@ A repository of configuration files for ZSH, Neovim, and more.
 
 ## Suggested packages
 
-1. `fzf` (fuzzy-finder)
-2. `bat` (`cat` alternative)
-3. `prettyping` (`ping` alternative)
-4. `neovim` (`vim` alternative)
-5. `rust`/`cargo`
-6. `composer` (PHP package manager)
-7. `deno` (JS runtime)
-8. `pnpm` (npm alternative)
+1. `fzf@0.57.0` (fuzzy-finder)
+2. `bat@0.24.0` (`cat` alternative)
+3. `prettyping@20240117` (`ping` alternative)
+4. `neovim@0.10.3` (`vim` alternative)
