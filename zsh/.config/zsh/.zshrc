@@ -9,6 +9,10 @@ export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_RUNTIME_DIR=$(_macos "$(getconf DARWIN_USER_TEMP_DIR)" "/run/user/$UID")
 
+# XDG fixes
+export DOCKER_CONFIG="$XDG_CONFIG_HOME"/docker
+export LESSHISTFILE="$XDG_STATE_HOME"/less/history
+
 # Set the directory to store zinit and its plugins
 ZINIT_HOME="$XDG_DATA_HOME/zinit/zinit.git"
 
@@ -95,16 +99,13 @@ if [ -x "$FZF_EXISTS" ]; then
 	zstyle ':completion:*' menu no
 	zstyle ':fzf-tab:complete:cd:*' fzf-preview '${LS_BIN} --color=always --group-directories-first $realpath' # Directory previews in fzf
 fi
+if [[ ":$FPATH:" != *":/Users/joel/.config/zsh/completions:"* ]];
+	then export FPATH="/Users/joel/.config/zsh/completions:$FPATH";
+fi
 
 # Change zcompdump cache location
 autoload -Uz compinit
 compinit -d "$XDG_CACHE_HOME"/zsh/zcompdump-"$ZSH_VERSION"
-
-# Docker
-export DOCKER_CONFIG="$XDG_CONFIG_HOME"/docker
-
-# Less history
-export LESSHISTFILE="$XDG_STATE_HOME"/less/history
 
 # Aliases
 alias ..="cd .." # Move up a directory
@@ -128,11 +129,6 @@ alias mkcd="take" # Create & change directoriesx
 [[ -x "$FZF_EXISTS" ]] && eval "$(fzf --zsh)"
 [[ -x "$(command -v zoxide)" ]] && eval "$(zoxide init --cmd cd zsh)" # z > cd
 [[ -x "$(command -v brew)" ]] && eval "$(brew shellenv)"
-
-# Load ZSH completions
-if [[ ":$FPATH:" != *":/Users/joel/.config/zsh/completions:"* ]];
-	then export FPATH="/Users/joel/.config/zsh/completions:$FPATH";
-fi
 
 # Load the starship prompt
 eval "$(starship init zsh)"

@@ -1,24 +1,18 @@
 # Joel's Dot Files
-A repository of configuration files for ZSH, Vim, and more.
+A repository of configuration files for ZSH, Neovim, and more.
 
 ## Required packages
 
 1. `zsh`
-4. `bat` (`cat` alternative)
-5. `prettyping` (`ping` alternative)
-6. `neovim` (`vim` alternative)
+2. `stow` (GNU Stow, a symlink farm manager)
 7. `starship` (shell prompt, requires nerd fonts)
-8. `vim-plug` (Vim plugin manager)
 
 ## Suggested packages
 
-1. `rust`/`cargo`
-2. `composer` (PHP package manager)
-3. `deno` (JS runtime)
-4. `pnpm` (npm alternative)
-
-## Locations
-
-1. `.zshrc` -> `$HOME/.zshrc`
-2. `init.vim` -> `$HOME/.config/nvim`
-3. `starship.toml` -> `$HOME/.config`
+1. `bat` (`cat` alternative)
+2. `prettyping` (`ping` alternative)
+3. `neovim` (`vim` alternative)
+4. `rust`/`cargo`
+5. `composer` (PHP package manager)
+6. `deno` (JS runtime)
+7. `pnpm` (npm alternative)
