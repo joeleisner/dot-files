@@ -93,15 +93,15 @@ setopt hist_ignore_dups
 setopt hist_find_no_dups
 
 # ls command
-LS_BIN=$(_macos "gls" "ls")
-LS_EXISTS=$(command -v ${LS_BIN})
+export LS_NAME=$(_macos "gls" "ls")
+LS_EXISTS=$(command -v ${LS_NAME})
 
 # Completion styling
 zstyle ':completion:*' cache-path "$XDG_CACHE_HOME"/zsh/zcompcache # Change zcompcache directory
 zstyle ':completion:*' matcher-list m:{a-z}={A-Za-z} # Case-insensitive
 if [ -x "$FZF_EXISTS" ]; then
 	zstyle ':completion:*' menu no
-	zstyle ':fzf-tab:complete:cd:*' fzf-preview '${LS_BIN} --color=always --group-directories-first $realpath' # Directory previews in fzf
+	zstyle ':fzf-tab:complete:cd:*' fzf-preview '$LS_NAME --color=always --group-directories-first $realpath' # Directory previews in fzf
 fi
 if [[ ":$FPATH:" != *":/Users/joel/.config/zsh/completions:"* ]];
 	then export FPATH="/Users/joel/.config/zsh/completions:$FPATH";
