@@ -14,3 +14,4 @@ A repository of configuration files for ZSH, Neovim, and more.
 2. `bat@0.24.0` (`cat` alternative)
 3. `prettyping@20240117` (`ping` alternative)
 4. `neovim@0.10.3` (`vim` alternative)
+5. `yt-dlp@2024.12.23` (audio/video downloader)
