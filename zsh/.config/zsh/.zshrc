@@ -111,14 +111,30 @@ fi
 autoload -Uz compinit
 compinit -d "$XDG_CACHE_HOME"/zsh/zcompdump-"$ZSH_VERSION"
 
+# Shell integrations
+[[ -x "$FZF_EXISTS" ]] && eval "$(fzf --zsh)"
+[[ -x "$(command -v zoxide)" ]] && eval "$(zoxide init --cmd cd zsh)" # z > cd
+if [ -d "/home/linuxbrew" ]; then
+	eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+else
+	[[ -x "$(command -v brew)" ]] && eval "$(brew shellenv)"
+fi
+
 # Aliases
 alias ..="cd .." # Move up a directory
 [[ -x "$(command -v bat)" ]] && alias cat="bat --theme=Dracula" # bat > cat
 
-if [ -x "$LS_EXISTS" ]; then
-	alias ls="$LS_BIN --color --group-directories-first" # ls colors & dirs first
+if [ -x "$DIRCOLOR_EXISTS" ]; then
+	if [ -x "$LS_EXISTS" ]; then
+		alias ls="$LS_BIN --color --group-directories-first" # ls colors & dirs first
+	else
+		alias ls="ls --color"
+	fi
+	[[ -x "$(command -v grep)" ]] && alias grep="grep --color=auto"
+	[[ -x "$(command -v fgrep)" ]] && alias fgrep="fgrep --color=auto"
+	[[ -x "$(command -v egrep)" ]] && alias egrep="egrep --color=auto"
 else
-	alias ls="ls --color"
+	[[ -x "$LS_EXISTS" ]] && alias ls="$LS_BIN --group-directories-first"
 fi
 
 [[ -x "$(command -v prettyping)" ]] && alias ping="prettyping" # prettyping > ping
@@ -139,15 +155,6 @@ if [[ "$OSTYPE" == linux* ]]; then
 	else
 		alias open="xdg-open ." # Open things in the configured file manager
 	fi
-fi
-
-# Shell integrations
-[[ -x "$FZF_EXISTS" ]] && eval "$(fzf --zsh)"
-[[ -x "$(command -v zoxide)" ]] && eval "$(zoxide init --cmd cd zsh)" # z > cd
-if [ -d "/home/linuxbrew" ]; then
-	eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-else
-	[[ -x "$(command -v brew)" ]] && eval "$(brew shellenv)"
 fi
 
 # Load the starship prompt
