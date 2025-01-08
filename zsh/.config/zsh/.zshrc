@@ -17,6 +17,15 @@ fi
 export DOCKER_CONFIG="$XDG_CONFIG_HOME"/docker
 export LESSHISTFILE="$XDG_STATE_HOME"/less/history
 
+# Path
+path=(
+	$path
+	$HOME/.local/bin
+)
+
+typeset -U path; path=($^path(N-/)) # Remove duplicates/non-existent dirs from path
+export PATH
+
 # Set the directory to store zinit and its plugins
 ZINIT_HOME="$XDG_DATA_HOME/zinit/zinit.git"
 
@@ -126,7 +135,7 @@ alias ..="cd .." # Move up a directory
 
 if [ -x "$DIRCOLOR_EXISTS" ]; then
 	if [ -x "$LS_EXISTS" ]; then
-		alias ls="$LS_BIN --color --group-directories-first" # ls colors & dirs first
+		alias ls="$LS_NAME --color --group-directories-first" # ls colors & dirs first
 	else
 		alias ls="ls --color"
 	fi
@@ -134,7 +143,7 @@ if [ -x "$DIRCOLOR_EXISTS" ]; then
 	[[ -x "$(command -v fgrep)" ]] && alias fgrep="fgrep --color=auto"
 	[[ -x "$(command -v egrep)" ]] && alias egrep="egrep --color=auto"
 else
-	[[ -x "$LS_EXISTS" ]] && alias ls="$LS_BIN --group-directories-first"
+	[[ -x "$LS_EXISTS" ]] && alias ls="$LS_NAME --group-directories-first"
 fi
 
 [[ -x "$(command -v prettyping)" ]] && alias ping="prettyping" # prettyping > ping
