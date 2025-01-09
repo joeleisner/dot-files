@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+if [ -z "$1" ]
+then
+	echo "domain name missing"
+	exit 1
+fi
+name="$1"
+shift
+
+now_epoch=$( date +%s )
+output=""
+index=2
+ips=$(dig +noall +answer "$name" | awk '{print $5}')
+
+for ip in $ips; do
+	expiry_date=$( echo | openssl s_client -showcerts -servername "$name" -connect "$ip:443" 2>/dev/null | openssl x509 -inform pem -noout -enddate | cut -d "=" -f 2 )
+	expiry_epoch=$( date -d "$expiry_date" +%s )
+	expiry_days="$(( (expiry_epoch - now_epoch) / (3600 * 24) ))"
+	output+="\e[3${index}m$ip\e[0m|$expiry_date|$expiry_days days\n"
+	((index=index+1))
+done
+
+echo -e "$output" | column -t -s "|"
