@@ -1,0 +1,10 @@
+background-opacity = 0.8
+background-blur-radius = 20
+cursor-style = block
+font-family = Monaspace Radon NF
+font-feature = calt,liga,dlig
+font-size = 16
+shell-integration-features = no-cursor,sudo,no-title
+theme = dark:Rose Pine Moon,light:Rose Pine Dawn
+window-padding-balance = true
+window-save-state = always
