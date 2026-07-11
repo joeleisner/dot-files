@@ -1,0 +1,4 @@
+# This file lives at the root of your repo as: dot_zshrc
+if [ -f "$HOME/.config/zsh/.zshrc" ]; then
+    source "$HOME/.config/zsh/.zshrc"
+fi
