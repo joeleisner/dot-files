@@ -9,3 +9,6 @@ export CARGO_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/cargo"
 
 # MISE experimental support (monorepos)
 export MISE_EXPERIMENTAL=true
+
+# Ignore space-prefixed commands and duplicate entries in history
+export HISTCONTROL="ignorespace:ignoredups"

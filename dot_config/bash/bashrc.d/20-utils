@@ -1,12 +1,32 @@
 # Create a directory and immediately change into it
 mkcd() {
-    if [ -z "$1" ]; then
-        echo "Usage: mkcd <directory>"
-        return 1
-    fi
-    mkdir -p "$1" && cd "$1"
+	if [ -z "$1" ]; then
+		echo "Usage: mkcd <directory>"
+		return 1
+	fi
+	mkdir -p "$1" && cd "$1"
 }
+
+alias ..="cd .." # Move up a dir
+alias cp="cp -iv" # Safe cp
+alias mv="mv -iv" # Safe mv
 
 # Standardize crisp, human-readable list formats
 alias ll="ls -lh"
 alias la="ls -lhA"
+
+[[ -x "$(command -v bat)" ]] && alias cat="bat --style=plain --pager=never"
+[[ -x "$(command -v prettyping)" ]] && alias ping="prettyping"
+
+# Check if 'open' is already a command, function, or alias
+if ! command -v open >/dev/null 2>&1; then
+	if [ -n "$WSL_DISTRO_NAME" ]; then
+		# WSL: Forward to Windows default browser/handler
+		alias open="wslview"
+	else
+		# Regular Linux: Use xdg-open if a GUI environment exists
+		if command -v xdg-open >/dev/null 2>&1; then
+			alias open="xdg-open"
+		fi
+	fi
+fi
