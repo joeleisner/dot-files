@@ -1,0 +1,18 @@
+# 1Password SSH agent setup
+if [ -n "$WSL_DISTRO_NAME" ]; then
+    # WSL Instance Path
+    export SSH_AUTH_SOCK="$HOME/.ssh/agent.sock"
+else
+    # Aurora Linux / Bare-Metal Path
+    export SSH_AUTH_SOCK="$HOME/.1password/agent.sock"
+fi
+
+# Mise activation for Bash
+if command -v mise >/dev/null 2>&1; then
+    eval "$(mise activate bash)"
+fi
+
+# Bling source (Aurora only)
+if [ -f /usr/share/ublue-os/bling/bling.sh ]; then
+    . /usr/share/ublue-os/bling/bling.sh
+fi
