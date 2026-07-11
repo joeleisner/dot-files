@@ -1,0 +1,12 @@
+# Create a directory and immediately change into it
+mkcd() {
+    if [ -z "$1" ]; then
+        echo "Usage: mkcd <directory>"
+        return 1
+    fi
+    mkdir -p "$1" && cd "$1"
+}
+
+# Standardize crisp, human-readable list formats
+alias ll="ls -lh"
+alias la="ls -lhA"
