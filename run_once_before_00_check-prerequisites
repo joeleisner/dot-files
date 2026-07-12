@@ -14,5 +14,5 @@ if [ ${#MISSING_DEPS[@]} -ne 0 ]; then
 	echo "Please install the following packages first: ${MISSING_DEPS[*]}" >&2
 	exit 1
 else
-	echo "Required dependencies already installed."
+	echo "✅️ Required dependencies already installed."
 fi

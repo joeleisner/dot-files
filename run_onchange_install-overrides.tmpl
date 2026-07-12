@@ -9,11 +9,11 @@
 
 # Bail if brew isn't installed yet
 if ! command -v brew &> /dev/null; then
-	echo "Homebrew not found. Skipping dependency overrides."
+	echo "⏭️ Homebrew not found. Skipping dependency overrides."
 	exit 0
 fi
 
-echo "Dependency overrides upgrade/installation starting..."
+echo "🔀 Installing dependency overrides..."
 
 # Batch run via an inline Brewfile definition
 NONINTERACTIVE=1 HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file=- <<EOF
@@ -23,4 +23,4 @@ brew "openssh"
 brew "wget"
 EOF
 
-echo "Dependency overrides installation complete!"
+echo "✅️ Dependency overrides are installed!"

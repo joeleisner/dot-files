@@ -7,8 +7,8 @@
 	eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 {{ end }}
 
-echo "Packages installation starting..."
+echo "📦️ Installing packages..."
 
 HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file={{ joinPath .chezmoi.sourceDir ".chezmoitemplates/Brewfile" | quote }}
 
-echo "Packages installation complete!"
+echo "✅️ Packages are installed!"
