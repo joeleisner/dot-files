@@ -1,0 +1,29 @@
+{{- if (and (hasKey . "has_ipod") .has_ipod) }}
+#!/bin/bash
+
+echo "Scanning for FAT32-incompatible characters..."
+
+# -depth ensures we process files inside a folder before the folder itself
+find . -depth -print0 | while IFS= read -r -d '' item; do
+    dir=$(dirname "$item")
+    base=$(basename "$item")
+
+    # Skip the current directory root (.)
+    if [ "$base" = "." ]; then
+        continue
+    fi
+
+    # Swap invalid FAT32 characters (\ : * ? " < > |) for a dash (-)
+    new_base=$(echo "$base" | tr ':\*?"<>|\\' '-')
+
+    # If the name changed, rename the file/folder
+    if [ "$base" != "$new_base" ]; then
+        # -n prevents overwriting if the new name already exists
+        mv -n "$item" "$dir/$new_base"
+        echo "Renamed: '$base' -> '$new_base'"
+    fi
+done
+
+echo "Filename sanitization complete!"
+
+{{- end }}

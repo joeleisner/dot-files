@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+amount="$1"
+[[ -z "$amount" ]] && amount=10
+
+find . -type f -exec du -h '{}' + | sort -hr | head -n "$amount"

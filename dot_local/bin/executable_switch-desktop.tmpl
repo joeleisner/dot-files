@@ -1,0 +1,97 @@
+{{- if (and (hasKey . "is_kde") .is_kde) }}
+#!/usr/bin/env bash
+set -euo pipefail
+
+DEST="org.kde.KWin"
+PATH_OBJ="/VirtualDesktopManager"
+IFACE="org.kde.KWin.VirtualDesktopManager"
+uuid_re='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+
+get_prop() {
+  gdbus call --session --dest "$DEST" --object-path "$PATH_OBJ" \
+    --method org.freedesktop.DBus.Properties.Get "$IFACE" "$1"
+}
+
+set_current() {
+  gdbus call --session --dest "$DEST" --object-path "$PATH_OBJ" \
+    --method org.freedesktop.DBus.Properties.Set "$IFACE" current "<'$1'>" > /dev/null
+}
+
+# Parse the desktops property, tolerating type annotations and either quote style
+declare -a ids names
+raw=$(get_prop desktops)
+while IFS= read -r entry; do
+  ids+=(   "$(sed -E "s/^\((uint32 )?[0-9]+, ['\"]([^'\"]+)['\"].*/\2/" <<< "$entry")" )
+  names+=( "$(sed -E "s/^.*, ['\"](.*)['\"]\)$/\1/" <<< "$entry")" )
+done < <(grep -oE "\((uint32 )?[0-9]+, ('[^']*'|\"[^\"]*\"), ('[^']*'|\"[^\"]*\")\)" <<< "$raw")
+
+if (( ${#ids[@]} == 0 )); then
+  echo "Failed to parse desktop list from KWin. Raw output was:" >&2
+  echo "$raw" >&2
+  exit 1
+fi
+
+current=$(get_prop current | grep -oE "$uuid_re")
+count=${#ids[@]}
+
+current_index() {
+  for i in "${!ids[@]}"; do
+    [[ "${ids[$i]}" == "$current" ]] && { echo "$i"; return 0; }
+  done
+  echo 0
+}
+
+usage() {
+  echo "Usage: $(basename "$0") [next|prev|<number>|<name>|--list]"
+  echo "  No argument: cycle to the next desktop (wraps)"
+}
+
+resolve_target() {
+  local query="$1"
+
+  # Numeric: 1-based desktop position
+  if [[ "$query" =~ ^[0-9]+$ ]]; then
+    if (( query >= 1 && query <= count )); then
+      echo "${ids[$((query - 1))]}"
+      return 0
+    fi
+    echo "Desktop number out of range (1-$count): $query" >&2
+    return 1
+  fi
+
+  # Name match (case-insensitive, first match wins)
+  local q_lower="${query,,}"
+  for i in "${!ids[@]}"; do
+    if [[ "${names[$i],,}" == "$q_lower" ]]; then
+      echo "${ids[$i]}"
+      return 0
+    fi
+  done
+  echo "No desktop named: $query" >&2
+  return 1
+}
+
+idx=$(current_index)
+
+case "${1:-}" in
+  -h|--help)
+    usage; exit 0 ;;
+  -l|--list)
+    for i in "${!ids[@]}"; do
+      marker=" "
+      [[ "${ids[$i]}" == "$current" ]] && marker="*"
+      printf '%s %d  %s  %s\n' "$marker" "$((i + 1))" "${ids[$i]}" "${names[$i]}"
+    done
+    exit 0 ;;
+  ""|next)
+    target="${ids[$(( (idx + 1) % count ))]}" ;;
+  prev|previous)
+    target="${ids[$(( (idx - 1 + count) % count ))]}" ;;
+  *)
+    target=$(resolve_target "$1") ;;
+esac
+
+[[ "$target" == "$current" ]] && exit 0
+set_current "$target"
+
+{{- end }}

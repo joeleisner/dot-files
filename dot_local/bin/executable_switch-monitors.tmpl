@@ -1,0 +1,27 @@
+{{- if (and (hasKey . "is_at_home") .is_at_home) }}
+#!/bin/bash
+
+TARGET_INPUT=$1
+
+case "$TARGET_INPUT" in
+    linux)
+        HEX_VAL_1="0x0f"
+	HEX_VAL_2="0x0f"
+        ;;
+    work)
+        HEX_VAL_1="0x12"
+	HEX_VAL_2="0x11"
+        ;;
+    *)
+        echo "Usage: $0 {linux|work}"
+        exit 1
+        ;;
+esac
+
+# Send commands to both monitors simultaneously
+/usr/bin/ddcutil --bus=9 setvcp 60 "$HEX_VAL_1" &
+/usr/bin/ddcutil --bus=10 setvcp 60 "$HEX_VAL_2" &
+
+wait
+
+{{- end }}

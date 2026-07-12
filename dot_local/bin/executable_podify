@@ -1,0 +1,87 @@
+{{- if .has_ipod }}
+#!/bin/bash
+
+# ============================================
+# iPod Sync Script
+# ============================================
+# Music:    processed in-place, then synced to iPod.
+# Podcasts: rsynced to a local staging dir first,
+#           processed there, then synced to iPod.
+#           NAS originals are never modified.
+# ============================================
+
+# Music directories
+MUSIC_SRC="/var/mnt/music"
+MUSIC_DEST="/run/media/joel/JOEL_S IPOD/Music/"
+
+# Podcast directories
+PODCAST_SRC="/var/mnt/podcasts"
+PODCAST_STAGING="$HOME/.local/share/podify/podcasts"
+PODCAST_DEST="/run/media/joel/JOEL_S IPOD/Podcasts/"
+
+# ------------------------------------------
+# Music: process in-place, sync to iPod
+# ------------------------------------------
+sync_music() {
+    echo "==========================================="
+    echo "       Processing Music"
+    echo "==========================================="
+
+    cd "$MUSIC_SRC" || { echo "Error: Could not access $MUSIC_SRC"; return 1; }
+
+    echo -e "\n---> Step 1: Sanitizing filenames for FAT32 (iname)..."
+    iname
+
+    echo -e "\n---> Step 2: Optimizing artwork for Rockbox (icoverr)..."
+    icoverr .
+
+    echo -e "\n---> Step 3: Syncing Music to iPod (isync)..."
+    isync --no-artwork "$MUSIC_SRC" "$MUSIC_DEST"
+
+    echo -e "\n---> Music processing complete!\n"
+}
+
+# ------------------------------------------
+# Podcasts: stage locally, process, sync to iPod
+# ------------------------------------------
+sync_podcasts() {
+    echo "==========================================="
+    echo "       Processing Podcasts"
+    echo "==========================================="
+
+    # Ensure the staging directory exists
+    mkdir -p "$PODCAST_STAGING"
+
+    # Sync NAS -> staging
+    # --ignore-existing: don't overwrite files already in staging (they may
+    #   have been processed by icover and will differ from the NAS originals)
+    # --delete: remove episodes from staging that were deleted on the NAS
+    echo -e "\n---> Step 1: Syncing NAS to local staging..."
+    rsync -av --ignore-existing --delete --modify-window=2 --progress "$PODCAST_SRC/" "$PODCAST_STAGING/"
+    find "$PODCAST_STAGING" -type d -exec touch {}/database.ignore \;
+
+    cd "$PODCAST_STAGING" || { echo "Error: Could not access $PODCAST_STAGING"; return 1; }
+
+    echo -e "\n---> Step 2: Sanitizing filenames for FAT32 (iname)..."
+    iname
+
+    echo -e "\n---> Step 3: Optimizing artwork for Rockbox (icoverr)..."
+    icoverr .
+
+    echo -e "\n---> Step 4: Syncing staged Podcasts to iPod (isync)..."
+    isync --no-artwork "$PODCAST_STAGING" "$PODCAST_DEST"
+
+    echo -e "\n---> Podcast processing complete!\n"
+}
+
+# ------------------------------------------
+# Run both
+# ------------------------------------------
+sync_music
+sync_podcasts
+
+echo "==========================================="
+echo "   All Syncs Complete! Safe to disconnect."
+echo "==========================================="
+
+{{- end }}
