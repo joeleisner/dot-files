@@ -15,9 +15,6 @@ alias mv="mv -iv" # Safe mv
 alias ll="ls -lh"
 alias la="ls -lhA"
 
-[[ -x "$(command -v bat)" ]] && alias cat="bat --style=plain --pager=never"
-[[ -x "$(command -v prettyping)" ]] && alias ping="prettyping"
-
 # Check if 'open' is already a command, function, or alias
 if ! command -v open >/dev/null 2>&1; then
 	if [ -n "$WSL_DISTRO_NAME" ]; then

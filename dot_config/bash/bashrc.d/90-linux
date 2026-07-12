@@ -11,8 +11,3 @@ fi
 if command -v mise >/dev/null 2>&1; then
     eval "$(mise activate bash)"
 fi
-
-# Bling source (Aurora only)
-if [ -f /usr/share/ublue-os/bling/bling.sh ]; then
-    . /usr/share/ublue-os/bling/bling.sh
-fi
