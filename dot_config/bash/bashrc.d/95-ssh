@@ -1,0 +1,4 @@
+# Add keys + verify 1Password SSH agent status
+if command -v ssh-add &> /dev/null && [ -S "$SSH_AUTH_SOCK" ]; then
+	ssh-add -l &> /dev/null || echo "⚠️ Warning: No keys found. Ensure 1Password is unlocked."
+fi
