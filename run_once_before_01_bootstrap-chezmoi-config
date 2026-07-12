@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# Seed chezmoi's own config with default feature toggles, but only on a
+# fresh machine. Never overwrites an existing config, so manual edits via
+# `chezmoi edit-config` are never clobbered by future applies.
+target="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
+
+if [ ! -f "$target" ]; then
+	mkdir -p "$(dirname "$target")"
+	cat > "$target" <<'EOF'
+[data]
+	has_ipod = false
+	is_kde = false
+	at_home = false
+EOF
+	echo "✅️ Seeded default chezmoi config at $target"
+fi

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+# One-time migration of pre-existing history/cache files into their new
+# XDG-compliant locations. Safe to re-run: no-ops once files are migrated.
+XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+
+# Bash and zsh history files are plain, line-oriented, and self-contained
+# per entry, so it's safe to concatenate an old file into a new one that's
+# already started accumulating entries at the new location.
+migrate_append() {
+	old="$1"
+	new="$2"
+
+	[ -e "$old" ] || return 0
+	mkdir -p "$(dirname "$new")"
+
+	if [ -e "$new" ]; then
+		cat "$old" "$new" > "$new.tmp" && mv "$new.tmp" "$new"
+	else
+		mv "$old" "$new"
+	fi
+	rm -f "$old"
+}
+
+# less' .lesshst and wget's .wget-hsts are structured, single-header files.
+# Naively concatenating two of them would corrupt the format, and neither
+# holds anything worth preserving, so the new file just wins outright.
+migrate_replace() {
+	old="$1"
+	new="$2"
+
+	[ -e "$old" ] || return 0
+	mkdir -p "$(dirname "$new")"
+
+	if [ -e "$new" ]; then
+		rm -f "$old"
+	else
+		mv "$old" "$new"
+	fi
+}
+
+migrate_append "$HOME/.bash_history" "$XDG_STATE_HOME/bash/history"
+migrate_append "$HOME/.zsh_history" "$XDG_STATE_HOME/zsh/history"
+migrate_replace "$HOME/.lesshst" "$XDG_STATE_HOME/less/history"
+migrate_replace "$HOME/.wget-hsts" "$XDG_DATA_HOME/wget/hsts"
+
+echo "✅️ XDG history migration complete."

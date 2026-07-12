@@ -1,0 +1,5 @@
+# XDG-compliant history location
+export HISTFILE="$XDG_STATE_HOME/zsh/history"
+export HISTSIZE=50000
+export SAVEHIST=10000
+mkdir -p "$(dirname "$HISTFILE")"

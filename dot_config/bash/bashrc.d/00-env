@@ -15,3 +15,7 @@ export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
 
 # Ignore space-prefixed commands and duplicate entries in history
 export HISTCONTROL="ignorespace:ignoredups"
+
+# Force less to respect XDG specifications
+export LESSHISTFILE="$XDG_STATE_HOME/less/history"
+mkdir -p "$(dirname "$LESSHISTFILE")"

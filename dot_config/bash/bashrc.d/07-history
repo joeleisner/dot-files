@@ -1,0 +1,3 @@
+# XDG-compliant history location
+export HISTFILE="$XDG_STATE_HOME/bash/history"
+mkdir -p "$(dirname "$HISTFILE")"
