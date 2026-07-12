@@ -17,7 +17,7 @@ echo "🔀 Installing dependency overrides..."
 
 # Batch run via an inline Brewfile definition
 NONINTERACTIVE=1 HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file=- <<EOF
-{{- template "Brewfile-overrides" . }}
+{{ template "Brewfile-overrides" . }}
 EOF
 
 echo "✅️ Dependency overrides are installed!"
