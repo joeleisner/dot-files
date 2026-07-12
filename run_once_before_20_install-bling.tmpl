@@ -9,6 +9,6 @@
 
 echo "Shell bling installation starting..."
 
-brew bundle --no-lock --file={{ joinPath .chezmoi.sourceDir ".chezmoitemplates/Brewfile" | quote }}
+HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file={{ joinPath .chezmoi.sourceDir ".chezmoitemplates/Brewfile" | quote }}
 
 echo "Shell bling installation complete!"
