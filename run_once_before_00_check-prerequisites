@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DEPENDENCIES=("git" "curl")
+DEPENDENCIES=("git")
 MISSING_DEPS=()
 
 for dep in "${DEPENDENCIES[@]}"; do
@@ -10,9 +10,9 @@ for dep in "${DEPENDENCIES[@]}"; do
 done
 
 if [ ${#MISSING_DEPS[@]} -ne 0 ]; then
-	echo "❌ Error: Missing required dependencies for Homebrew setup." >&2
+	echo "❌ Error: Missing required dependencies." >&2
 	echo "Please install the following packages first: ${MISSING_DEPS[*]}" >&2
 	exit 1
 else
-	echo "Dependencies required for Homebrew setup already installed."
+	echo "Required dependencies already installed."
 fi

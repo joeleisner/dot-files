@@ -14,17 +14,4 @@ echo "Homebrew not found. Starting installation..."
 # Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# Dynamically load Homebrew
-{{ if eq .chezmoi.os "darwin" }}
-	# macOS
-	if [ -f "/opt/homebrew/bin/brew" ]; then
-		eval "$(/opt/homebrew/bin/brew shellenv)"
-	fi
-{{ else if eq .chezmoi.os "linux" }}
-	# Linux & WSL
-	if [ -d "/home/linuxbrew/.linuxbrew" ]; then
-		eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-	fi
-{{ end }}
-
-echo "Homebrew installation complete and environment loaded!"
+echo "Homebrew installation complete!"
