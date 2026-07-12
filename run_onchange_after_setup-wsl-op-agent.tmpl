@@ -44,7 +44,12 @@ else
 
 	git clone --quiet --depth 1 https://github.com/jstarks/npiperelay.git "$BUILD_DIR"
 	mkdir -p "$(dirname "$NPIPERELAY_EXE")"
-	(cd "$BUILD_DIR" && GOOS=windows GOARCH=amd64 mise exec go@latest -- go build -o "$NPIPERELAY_EXE" .)
+	(
+		cd "$BUILD_DIR"
+		export GOPATH="${XDG_DATA_HOME:-$HOME/.local/share}/go"
+		export GOCACHE="${XDG_CACHE_HOME:-$HOME/.cache}/go-build"
+		GOOS=windows GOARCH=amd64 mise exec go@latest -- go build -o "$NPIPERELAY_EXE" .
+	)
 
 	echo "✅️ npiperelay.exe built!"
 fi

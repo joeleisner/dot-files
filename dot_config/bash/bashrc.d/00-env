@@ -7,6 +7,11 @@ export XDG_CACHE_HOME="$HOME/.cache"
 # Cargo installations location
 export CARGO_HOME="$XDG_DATA_HOME/cargo"
 
+# Force Go to respect XDG specifications
+export GOPATH="$XDG_DATA_HOME/go"
+export GOCACHE="$XDG_CACHE_HOME/go-build"
+export GOMODCACHE="$XDG_DATA_HOME/go/pkg/mod"
+
 # MISE experimental support (monorepos)
 export MISE_EXPERIMENTAL=true
 
