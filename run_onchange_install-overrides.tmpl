@@ -15,22 +15,12 @@ fi
 
 echo "Dependency overrides upgrade/installation starting..."
 
-# Formulae to manage
-formulas=(
-	curl
-	git
-	openssh
-	wget
-)
-
-for formula in "${formulas[@]}"; do
-	if brew list "$formula" &>/dev/null; then
-		# If already installed, ensure it is up to date
-		brew upgrade "$formula" 2>/dev/null || true
-	else
-		# Otherwise, install it
-		brew install "$formula"
-	fi
-done
+# Batch run via an inline Brewfile definition
+NONINTERACTIVE=1 HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file=- <<EOF
+brew "curl"
+brew "git"
+brew "openssh"
+brew "wget"
+EOF
 
 echo "Dependency overrides installation complete!"
