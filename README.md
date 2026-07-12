@@ -1,14 +1,22 @@
 # Joel's Dot Files
 
-My minimal, XDG-compliant dot files.
+My minimal, XDG-compliant, shell-impartial dot files + setup.
+
+## Features
+
+1. Works w/ Bash or ZSH
+2. Homebrew install
+3. Development dependencies and overrides
+4. Terminal bling
 
 ## Installation
 
-The following will be ran during initial setup:
+During initial setup, the following will be ran:
 
 1. Check for required dependencies
 2. Install Homebrew
 3. Install packages (for shell bling and web development)
+4. Install overrides (for dev-critical packages)
 
 ```sh
 sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- init --apply --branch 2.0.0 https://github.com/joeleisner/dot-files.git
@@ -16,7 +24,7 @@ sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- init --apply --branch 2.0.0 h
 
 ## Optional Feature Toggles
 
-This dotfiles configuration includes specialized scripts for my environments and locations. By default, these are optional.
+This configuration includes specialized scripts for my environments and locations. These are disabled by default and entirely optional.
 
 To enable or disable these features, you can configure your local Chezmoi state variables.
 
