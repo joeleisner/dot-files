@@ -1,9 +1,0 @@
-[Unit]
-Description=1Password SSH agent relay socket (WSL)
-
-[Socket]
-ListenStream=%h/.ssh/agent.sock
-SocketMode=0600
-
-[Install]
-WantedBy=sockets.target

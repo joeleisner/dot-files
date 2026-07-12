@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# Re-run whenever the systemd units change:
-# {{ include "dot_config/systemd/user/npiperelay.socket" | sha256sum }}
+# Re-run whenever the systemd unit changes:
 # {{ include "dot_config/systemd/user/npiperelay.service" | sha256sum }}
 
 set -e
@@ -53,8 +52,8 @@ fi
 mkdir -p "$(dirname "$NPIPERELAY_LINK")"
 ln -sf "$NPIPERELAY_EXE" "$NPIPERELAY_LINK"
 
-echo "🔌 Enabling npiperelay relay socket..."
+echo "🔌 Enabling npiperelay relay service..."
 systemctl --user daemon-reload
-systemctl --user enable --now npiperelay.socket
+systemctl --user enable --now npiperelay.service
 
 echo "✅️ WSL 1Password SSH agent relay is set up!"
