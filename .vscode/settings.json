@@ -1,5 +1,6 @@
 {
 	"files.associations": {
+		// Shell
 		"*.sh.tmpl": "shellscript",
 		"*.tmpl": "shellscript",
 		"executable_*": "shellscript",
@@ -8,6 +9,9 @@
 		"dot_zshrc": "shellscript",
 		"**/bashrc.d/*": "shellscript",
 		"**/zshrc.d/*": "shellscript",
-		"**/symlink_*": "ignore"
+		// Ignored
+		"**/symlink_*": "ignore",
+		// Config
+		"**/npmrc": "properties"
 	}
 }
