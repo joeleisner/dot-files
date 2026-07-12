@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Dynamically load Homebrew
+{{ if eq .chezmoi.os "darwin" }}
+	eval "$(/opt/homebrew/bin/brew shellenv)"
+{{ else if eq .chezmoi.os "linux" }}
+	eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+{{ end }}
+
+# Bail if brew isn't installed yet
+if ! command -v brew &> /dev/null; then
+	echo "Homebrew not found. Skipping dependency overrides."
+	exit 0
+fi
+
+echo "Dependency overrides upgrade/installation starting..."
+
+# Formulae to manage
+formulas=(
+	curl
+	git
+	openssh
+	wget
+)
+
+for formula in "${formulas[@]}"; do
+	if brew list "$formula" &>/dev/null; then
+		# If already installed, ensure it is up to date
+		brew upgrade "$formula" 2>/dev/null || true
+	else
+		# Otherwise, install it
+		brew install "$formula"
+	fi
+done
+
+echo "Dependency overrides installation complete!"
