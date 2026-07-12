@@ -1,0 +1,13 @@
+# Core Prompt & Navigation
+brew "starship"
+brew "zoxide"
+brew "direnv"
+
+# Modern CLI Replacements
+brew "eza"
+brew "ugrep"
+brew "bat"
+brew "prettyping"
+
+# Bash Hook Dependency
+brew "bash-preexec"

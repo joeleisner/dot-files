@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Dynamically load Homebrew path since scripts run in isolated shells
+{{ if eq .chezmoi.os "darwin" }}
+	eval "$(/opt/homebrew/bin/brew shellenv)"
+{{ else if eq .chezmoi.os "linux" }}
+	eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+{{ end }}
+
+echo "Shell bling installation starting..."
+
+brew bundle --no-lock --file={{ joinPath .chezmoi.sourceDir ".chezmoitemplates/Brewfile" | quote }}
+
+echo "Shell bling installation complete!"
