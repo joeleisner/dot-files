@@ -5,7 +5,7 @@ export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_CACHE_HOME="$HOME/.cache"
 
 # Cargo installations location
-export CARGO_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/cargo"
+export CARGO_HOME="$XDG_DATA_HOME/cargo"
 
 # MISE experimental support (monorepos)
 export MISE_EXPERIMENTAL=true

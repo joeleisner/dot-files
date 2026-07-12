@@ -1,5 +1,5 @@
 # Setup entries as a standard POSIX colon-separated list
-_entries="$HOME/.local/bin:${CARGO_HOME:-$HOME/.local/share/cargo}/bin"
+_entries="$HOME/.local/bin:${CARGO_HOME}/bin"
 
 _new_path=""
 IFS=:
