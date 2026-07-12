@@ -3,6 +3,9 @@ brew "starship"
 brew "zoxide"
 brew "direnv"
 
+# Environment & Runtime Manager
+brew "mise"
+
 # Modern CLI Replacements
 brew "eza"
 brew "ugrep"
