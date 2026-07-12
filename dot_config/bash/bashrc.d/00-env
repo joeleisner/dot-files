@@ -10,5 +10,8 @@ export CARGO_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/cargo"
 # MISE experimental support (monorepos)
 export MISE_EXPERIMENTAL=true
 
+# Force NPM to respect XDG specifications
+export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
+
 # Ignore space-prefixed commands and duplicate entries in history
 export HISTCONTROL="ignorespace:ignoredups"
