@@ -14,3 +14,6 @@ brew "prettyping"
 
 # Bash Hook Dependency
 brew "bash-preexec"
+
+# WSL + 1Password SSH Agent Relay
+brew "socat"

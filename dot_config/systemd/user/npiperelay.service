@@ -1,0 +1,8 @@
+[Unit]
+Description=Relay SSH agent socket to Windows 1Password via npiperelay
+Requires=npiperelay.socket
+
+[Service]
+ExecStart=/bin/sh -c 'exec socat STDIO EXEC:"npiperelay.exe -ei -s //./pipe/openssh-ssh-agent"'
+StandardInput=socket
+StandardError=journal
