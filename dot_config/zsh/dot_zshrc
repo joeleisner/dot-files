@@ -1,6 +1,6 @@
 # Automatically loop through and source modular files
 if [ -d "$HOME/.config/zsh/zshrc.d" ]; then
-    for file in "$HOME/.config/zsh/zshrc.d"/*(.N); do
+    for file in "$HOME/.config/zsh/zshrc.d"/*(-.N); do
         source "$file"
     done
 fi
