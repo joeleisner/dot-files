@@ -25,7 +25,7 @@ for dep in socat mise git wslpath cmd.exe; do
 	fi
 done
 
-WIN_PROFILE="$(cmd.exe /C "echo %USERPROFILE%" 2>/dev/null | tr -d '\r')"
+WIN_PROFILE="$(cd /mnt/c && cmd.exe /C "echo %USERPROFILE%" 2>/dev/null | tr -d '\r')"
 if [ -z "$WIN_PROFILE" ]; then
 	echo "❌ Error: Could not resolve Windows user profile via cmd.exe." >&2
 	exit 1
