@@ -9,6 +9,7 @@
 		"dot_zshrc": "shellscript",
 		"**/bashrc.d/*": "shellscript",
 		"**/zshrc.d/*": "shellscript",
+		"run_once*": "shellscript",
 		// Ignored
 		"**/symlink_*": "ignore",
 		// Config
