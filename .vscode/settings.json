@@ -8,6 +8,6 @@
 		"dot_zshrc": "shellscript",
 		"**/bashrc.d/*": "shellscript",
 		"**/zshrc.d/*": "shellscript",
-		"symlink_*": "ignore"
+		"**/symlink_*": "ignore"
 	}
 }
