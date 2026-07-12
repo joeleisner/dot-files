@@ -10,6 +10,7 @@
 		"**/bashrc.d/*": "shellscript",
 		"**/zshrc.d/*": "shellscript",
 		"run_once*": "shellscript",
+		"run_onchange*": "shellscript",
 		// Ignored
 		"**/symlink_*": "ignore",
 		// Properties
