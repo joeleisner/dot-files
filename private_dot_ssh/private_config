@@ -1,0 +1,6 @@
+Host *
+	IdentityAgent env:SSH_AUTH_SOCK
+	ForwardAgent yes
+	ControlMaster auto
+	ControlPath ~/.ssh/control/%r@%h:%p
+	ControlPersist 10m

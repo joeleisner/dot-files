@@ -12,7 +12,9 @@
 		"run_once*": "shellscript",
 		// Ignored
 		"**/symlink_*": "ignore",
-		// Config
-		"**/npmrc": "properties"
+		// Properties
+		"**/npmrc": "properties",
+		// SSH config
+		"private_config": "ssh-config",
 	}
 }
