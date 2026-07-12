@@ -12,6 +12,13 @@ if [ -z "$WSL_DISTRO_NAME" ]; then
 	exit 0
 fi
 
+# Dynamically load Homebrew
+{{ if eq .chezmoi.os "darwin" }}
+	eval "$(/opt/homebrew/bin/brew shellenv)"
+{{ else if eq .chezmoi.os "linux" }}
+	eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+{{ end }}
+
 for dep in socat mise git wslpath cmd.exe; do
 	if ! command -v "$dep" &> /dev/null; then
 		echo "❌ Error: $dep not found. Skipping WSL 1Password agent setup." >&2
