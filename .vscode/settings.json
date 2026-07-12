@@ -17,5 +17,6 @@
 		"**/npmrc": "properties",
 		// SSH config
 		"private_config": "ssh-config",
+		"Brewfile-*": "ruby",
 	}
 }

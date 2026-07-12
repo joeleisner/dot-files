@@ -1,0 +1,4 @@
+brew "curl"
+brew "git"
+brew "openssh"
+brew "wget"

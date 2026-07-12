@@ -9,6 +9,6 @@
 
 echo "📦️ Installing packages..."
 
-HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file={{ joinPath .chezmoi.sourceDir ".chezmoitemplates/Brewfile" | quote }}
+HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file={{ joinPath .chezmoi.sourceDir ".chezmoitemplates/Brewfile-packages" | quote }}
 
 echo "✅️ Packages are installed!"
