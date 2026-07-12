@@ -1,4 +1,4 @@
-{{- if .has_ipod }}
+{{- if (and (hasKey . "has_ipod") .has_ipod) }}
 #!/bin/bash
 
 # ============================================
