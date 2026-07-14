@@ -26,7 +26,7 @@ During initial setup, the following will be ran:
 4. Install overrides (for dev-critical packages)
 
 ```sh
-sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- init --apply --branch 2.0.0 https://github.com/joeleisner/dot-files.git
+sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- init --apply https://github.com/joeleisner/dot-files.git
 ```
 
 *On WSL, a script to automatically integrate 1Password into WSL will run. This means the files generated do not yet contain details from 1Password, and you will need to run `chezmoi apply` afterwards to complete the setup.*
