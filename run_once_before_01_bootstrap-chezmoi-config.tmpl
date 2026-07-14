@@ -11,10 +11,10 @@ fi
 mkdir -p "$(dirname "$CONFIG_FILE")"
 
 # Prompt for the machine-specific details
-GIT_NAME=$(chezmoi promptString "Enter git name")
-GIT_EMAIL=$(chezmoi promptString "Enter git email")
-GIT_SIGNING_KEY_URI=$(chezmoi promptString "Enter 1Password git signing key URI")
-SSH_URI=$(chezmoi promptString "Enter 1Password SSH config URI")
+read -p "Enter git name:" GIT_NAME
+read -p "Enter git email:" GIT_EMAIL
+read -p "Enter 1Password git signing key URI:" GIT_SIGNING_KEY_URI
+read -p "Enter 1Password SSH config URI" SSH_CONF_URI
 
 # Determine the right `op` command for the env
 OP_CMD="op"
@@ -31,7 +31,7 @@ cat > "$CONFIG_FILE" <<'EOF'
 	git_email = "${GIT_EMAIL}"
 	git_signing_key = "${GIT_SIGNING_KEY_URI}"
 	# SSH Config (1Password URI)
-	ssh_conf = "${SSH_URI}"
+	ssh_conf = "${SSH_CONF_URI}"
 	# Optional features
 	has_ipod = false
 	is_kde = false
