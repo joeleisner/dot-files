@@ -1,0 +1,87 @@
+{{- if (and (hasKey . "is_kde") .is_kde) }}
+#!/usr/bin/env bash
+set -euo pipefail
+
+DEST="org.kde.ActivityManager"
+PATH_OBJ="/ActivityManager/Activities"
+IFACE="org.kde.ActivityManager.Activities"
+uuid_re='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+
+adbus() {
+  gdbus call --session --dest "$DEST" --object-path "$PATH_OBJ" \
+    --method "$IFACE.$1" "${@:2}"
+}
+
+activity_name() {
+  adbus ActivityName "$1" | sed -E "s/^\('(.*)',\)$/\1/"
+}
+
+# Ordered list of all activity UUIDs
+mapfile -t activities < <(adbus ListActivities | grep -oE "$uuid_re")
+current=$(adbus CurrentActivity | grep -oE "$uuid_re")
+
+usage() {
+  echo "Usage: $(basename "$0") [activity-name | uuid | --list]"
+  echo "  No argument: cycle to the next activity"
+}
+
+resolve_target() {
+  local query="$1"
+
+  # Exact UUID?
+  if [[ "$query" =~ ^$uuid_re$ ]]; then
+    for id in "${activities[@]}"; do
+      [[ "$id" == "$query" ]] && { echo "$id"; return 0; }
+    done
+    echo "No activity with UUID: $query" >&2
+    return 1
+  fi
+
+  # Name match (case-insensitive)
+  local q_lower="${query,,}"
+  for id in "${activities[@]}"; do
+    local name; name=$(activity_name "$id")
+    if [[ "${name,,}" == "$q_lower" ]]; then
+      echo "$id"
+      return 0
+    fi
+  done
+  echo "No activity named: $query" >&2
+  return 1
+}
+
+next_in_cycle() {
+  local count=${#activities[@]}
+  for i in "${!activities[@]}"; do
+    if [[ "${activities[$i]}" == "$current" ]]; then
+      echo "${activities[$(( (i + 1) % count ))]}"
+      return 0
+    fi
+  done
+  # Current not found (shouldn't happen) — fall back to first
+  echo "${activities[0]}"
+}
+
+case "${1:-}" in
+  -h|--help)
+    usage; exit 0 ;;
+  -l|--list)
+    for id in "${activities[@]}"; do
+      marker=" "
+      [[ "$id" == "$current" ]] && marker="*"
+      printf '%s %s  %s\n' "$marker" "$id" "$(activity_name "$id")"
+    done
+    exit 0 ;;
+  "")
+    target=$(next_in_cycle) ;;
+  *)
+    target=$(resolve_target "$1") ;;
+esac
+
+if [[ "$target" == "$current" ]]; then
+  exit 0  # already there, nothing to do
+fi
+
+adbus SetCurrentActivity "$target" > /dev/null
+
+{{- end }}

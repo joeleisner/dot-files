@@ -1,0 +1,26 @@
+# XDG base directory specification
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.local/state"
+export XDG_CACHE_HOME="$HOME/.cache"
+
+# Cargo installations location
+export CARGO_HOME="$XDG_DATA_HOME/cargo"
+
+# Force Go to respect XDG specifications
+export GOPATH="$XDG_DATA_HOME/go"
+export GOCACHE="$XDG_CACHE_HOME/go-build"
+export GOMODCACHE="$XDG_DATA_HOME/go/pkg/mod"
+
+# MISE experimental support (monorepos)
+export MISE_EXPERIMENTAL=true
+
+# Force NPM to respect XDG specifications
+export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
+
+# Ignore space-prefixed commands and duplicate entries in history
+export HISTCONTROL="ignorespace:ignoredups"
+
+# Force less to respect XDG specifications
+export LESSHISTFILE="$XDG_STATE_HOME/less/history"
+mkdir -p "$(dirname "$LESSHISTFILE")"

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# If Homebrew's already installed, skip its installation
+if command -v brew &> /dev/null; then
+	echo "⏭️ Homebrew is already installed. Skipping."
+	exit 0
+fi
+
+echo "🍺 Homebrew not found. Starting installation..."
+
+# Install Homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+echo "✅️ Homebrew installed!"

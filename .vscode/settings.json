@@ -1,0 +1,25 @@
+{
+	"files.associations": {
+		// Shell
+		"*.sh.tmpl": "shellscript",
+		"*.tmpl": "shellscript",
+		"executable_*": "shellscript",
+		"dot_bash_profile": "shellscript",
+		"dot_bashrc": "shellscript",
+		"dot_zshrc": "shellscript",
+		"**/bashrc.d/*": "shellscript",
+		"**/zshrc.d/*": "shellscript",
+		"run_once*": "shellscript",
+		"run_onchange*": "shellscript",
+		// Ignored
+		"**/symlink_*": "ignore",
+		// Properties
+		"**/npmrc": "properties",
+		"**/git/executable_config.tmpl": "properties",
+		// SSH config
+		"private_config.tmpl": "ssh-config",
+		"Brewfile-*": "ruby",
+		// Ignore
+		".chezmoiignore": "ignore",
+	}
+}

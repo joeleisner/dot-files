@@ -1,0 +1,20 @@
+# Setup entries as a standard POSIX colon-separated list
+_entries="$HOME/.local/bin:${CARGO_HOME}/bin"
+
+_new_path=""
+IFS=:
+for dir in $_entries $PATH; do
+    [ -d "$dir" ] || continue
+    real="$(cd "$dir" 2>/dev/null && pwd -P)" || continue
+    case ":$_new_path:" in
+        *":$real:"*) ;;
+        *) _new_path="${_new_path:+$_new_path:}$dir" ;;
+    esac
+done
+unset IFS
+
+if [ -n "$_new_path" ]; then
+    PATH="$_new_path"
+fi
+unset _new_path _entries
+export PATH

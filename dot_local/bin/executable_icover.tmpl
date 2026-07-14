@@ -1,0 +1,202 @@
+{{- if (and (hasKey . "has_ipod") .has_ipod) }}
+#!/bin/bash
+
+# ==========================================
+# icover - Embed optimized artwork per file
+# ==========================================
+# Checks each audio file individually.
+# Skips files that already have <=300x300 art.
+# Processes files with missing or oversized art.
+# ==========================================
+
+# Detect which file types are present
+FLAC_FILES=(*.flac)
+MP3_FILES=(*.mp3)
+HAS_FLAC=false
+HAS_MP3=false
+[[ -f "${FLAC_FILES[0]}" ]] && HAS_FLAC=true
+[[ -f "${MP3_FILES[0]}" ]] && HAS_MP3=true
+
+if ! $HAS_FLAC && ! $HAS_MP3; then
+    echo "No audio files found!"
+    exit 1
+fi
+
+# ==========================================
+# Helper: find first file matching a glob
+# Usage: first_match "FRONT_COVER.*"
+# Prints the path if found, returns 1 if none
+# ==========================================
+first_match() {
+    local f
+    for f in $1; do
+        [[ -f "$f" ]] && echo "$f" && return 0
+    done
+    return 1
+}
+
+# ==========================================
+# Helper: clean up eyeD3 extracted images
+# ==========================================
+cleanup_eyeD3() {
+    rm -f FRONT_COVER.* BACK_COVER.* OTHER.* ICON.* 2>/dev/null
+}
+
+# ==========================================
+# Helper: check if a file needs processing
+# Returns 0 (true) if file needs artwork
+# Returns 1 (false) if artwork is already OK
+# ==========================================
+needs_processing() {
+    local file="$1"
+    local ext="${file##*.}"
+    ext="${ext,,}" # lowercase
+
+    if [[ "$ext" == "flac" ]]; then
+        metaflac --export-picture-to=_check_art.jpg "$file" 2>/dev/null
+    elif [[ "$ext" == "mp3" ]]; then
+        eyeD3 --write-images=. "$file" >/dev/null 2>&1
+        local extracted
+        extracted=$(first_match "FRONT_COVER.*")
+        if [[ -n "$extracted" ]]; then
+            mv "$extracted" _check_art.jpg
+            cleanup_eyeD3
+        fi
+    fi
+
+    if [[ -f _check_art.jpg ]]; then
+        local DIM W H
+        DIM=$(magick identify -format "%w %h" _check_art.jpg 2>/dev/null)
+        rm -f _check_art.jpg
+        read -r W H <<< "$DIM"
+        if [[ -n "$W" && -n "$H" ]] && (( W <= 300 && H <= 300 )); then
+            return 1  # already optimized
+        fi
+    fi
+
+    cleanup_eyeD3
+    return 0  # needs processing
+}
+
+# ==========================================
+# Build list of files that need processing
+# ==========================================
+FILES_TO_PROCESS=()
+
+if $HAS_FLAC; then
+    for f in *.flac; do
+        if needs_processing "$f"; then
+            FILES_TO_PROCESS+=("$f")
+        else
+            echo "Already optimized: $f"
+        fi
+    done
+fi
+
+if $HAS_MP3; then
+    for f in *.mp3; do
+        if needs_processing "$f"; then
+            FILES_TO_PROCESS+=("$f")
+        else
+            echo "Already optimized: $f"
+        fi
+    done
+fi
+
+if [[ ${#FILES_TO_PROCESS[@]} -eq 0 ]]; then
+    echo "All files already have optimized artwork. Nothing to do."
+    exit 0
+fi
+
+echo "${#FILES_TO_PROCESS[@]} file(s) need artwork processing."
+
+# ==========================================
+# Prepare the cover image (once per directory)
+# ==========================================
+if [[ -f cover.jpg ]]; then
+    echo "Using existing cover.jpg"
+    magick cover.jpg -resize 300x300 -interlace none -quality 80 cover_embed.jpg
+elif [[ -f cover.png ]]; then
+    echo "Using existing cover.png"
+    magick cover.png -resize 300x300 -interlace none -quality 80 cover_embed.jpg
+else
+    # Extract from the first file that has any artwork (regardless of size)
+    EXTRACTED=false
+    for f in "${FLAC_FILES[@]}" "${MP3_FILES[@]}"; do
+        [[ -f "$f" ]] || continue
+        local_ext="${f##*.}"
+        local_ext="${local_ext,,}"
+
+        if [[ "$local_ext" == "flac" ]]; then
+            metaflac --export-picture-to=_cover_src.jpg "$f" 2>/dev/null
+            if [[ -f _cover_src.jpg ]]; then
+                EXTRACTED=true
+                break
+            fi
+        elif [[ "$local_ext" == "mp3" ]]; then
+            eyeD3 --write-images=. "$f" >/dev/null 2>&1
+            local extracted
+            extracted=$(first_match "FRONT_COVER.*")
+            if [[ -n "$extracted" ]]; then
+                mv "$extracted" _cover_src.jpg
+                cleanup_eyeD3
+                EXTRACTED=true
+                break
+            fi
+        fi
+    done
+
+    if ! $EXTRACTED; then
+        echo "Warning: No cover art found in any file. Skipping artwork embedding."
+        exit 0
+    fi
+
+    magick _cover_src.jpg -resize 300x300 -interlace none -quality 80 cover_embed.jpg
+    rm -f _cover_src.jpg
+fi
+
+# ==========================================
+# Process only the files that need it
+# ==========================================
+for f in "${FILES_TO_PROCESS[@]}"; do
+    ext="${f##*.}"
+    ext="${ext,,}"
+
+    # Use this file's own embedded art if it has one (preserves unique per-track artwork);
+    # fall back to the shared cover for files with no embedded art.
+    EMBED_SRC="cover_embed.jpg"
+    if [[ "$ext" == "flac" ]]; then
+        metaflac --export-picture-to=_file_art.jpg "$f" 2>/dev/null
+        if [[ -f _file_art.jpg ]]; then
+            magick _file_art.jpg -resize 300x300 -interlace none -quality 80 _file_embed.jpg
+            rm -f _file_art.jpg
+            EMBED_SRC="_file_embed.jpg"
+        fi
+    elif [[ "$ext" == "mp3" ]]; then
+        eyeD3 --write-images=. "$f" >/dev/null 2>&1
+        extracted=$(first_match "FRONT_COVER.*")
+        if [[ -n "$extracted" ]]; then
+            magick "$extracted" -resize 300x300 -interlace none -quality 80 _file_embed.jpg
+            cleanup_eyeD3
+            EMBED_SRC="_file_embed.jpg"
+        fi
+    fi
+
+    if [[ "$ext" == "flac" ]]; then
+        metaflac --remove --block-type=PICTURE,PADDING --dont-use-padding "$f"
+        metaflac --import-picture-from="$EMBED_SRC" "$f"
+    elif [[ "$ext" == "mp3" ]]; then
+        eyeD3 --remove-all-images "$f"
+        eyeD3 --add-image "$EMBED_SRC:FRONT_COVER" "$f"
+    fi
+
+    [[ "$EMBED_SRC" == "_file_embed.jpg" ]] && rm -f _file_embed.jpg
+    echo "Processed: $f"
+done
+
+# Clean up
+rm -f cover_embed.jpg
+
+echo "Artwork optimized and embedded!"
+
+{{- end }}

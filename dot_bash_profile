@@ -1,0 +1,4 @@
+# Forward login shells to your standard interactive bashrc
+if [ -f "$HOME/.bashrc" ]; then
+    . "$HOME/.bashrc"
+fi

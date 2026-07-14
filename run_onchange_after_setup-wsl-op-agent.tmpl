@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+# Re-run whenever the systemd unit changes:
+# {{ include "dot_config/systemd/user/npiperelay.service" | sha256sum }}
+
+set -e
+
+# WSL-only: relays the SSH agent socket to 1Password on the Windows side via
+# npiperelay + socat. No-op everywhere else.
+if [ -z "$WSL_DISTRO_NAME" ]; then
+	exit 0
+fi
+
+# Dynamically load Homebrew
+{{ if eq .chezmoi.os "darwin" }}
+	eval "$(/opt/homebrew/bin/brew shellenv)"
+{{ else if eq .chezmoi.os "linux" }}
+	eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+{{ end }}
+
+for dep in socat mise git wslpath cmd.exe; do
+	if ! command -v "$dep" &> /dev/null; then
+		echo "❌ Error: $dep not found. Skipping WSL 1Password agent setup." >&2
+		exit 1
+	fi
+done
+
+WIN_PROFILE="$(cd /mnt/c && cmd.exe /C "echo %USERPROFILE%" 2>/dev/null | tr -d '\r')"
+if [ -z "$WIN_PROFILE" ]; then
+	echo "❌ Error: Could not resolve Windows user profile via cmd.exe." >&2
+	exit 1
+fi
+
+NPIPERELAY_EXE="$(wslpath "$WIN_PROFILE")/.npiperelay/npiperelay.exe"
+NPIPERELAY_LINK="$HOME/.local/bin/npiperelay.exe"
+
+if [ -f "$NPIPERELAY_EXE" ]; then
+	echo "⏭️ npiperelay.exe already exists at $NPIPERELAY_EXE. Skipping build."
+else
+	echo "🛠️ Building npiperelay.exe..."
+
+	BUILD_DIR="$(mktemp -d)"
+	trap 'rm -rf "$BUILD_DIR"' EXIT
+
+	git clone --quiet --depth 1 https://github.com/jstarks/npiperelay.git "$BUILD_DIR"
+	mkdir -p "$(dirname "$NPIPERELAY_EXE")"
+	(
+		cd "$BUILD_DIR"
+		export GOPATH="${XDG_DATA_HOME:-$HOME/.local/share}/go"
+		export GOCACHE="${XDG_CACHE_HOME:-$HOME/.cache}/go-build"
+		GOOS=windows GOARCH=amd64 mise exec go@latest -- go build -o "$NPIPERELAY_EXE" .
+	)
+
+	echo "✅️ npiperelay.exe built!"
+fi
+
+mkdir -p "$(dirname "$NPIPERELAY_LINK")"
+ln -sf "$NPIPERELAY_EXE" "$NPIPERELAY_LINK"
+
+echo "🔌 Enabling npiperelay relay service..."
+systemctl --user daemon-reload
+systemctl --user enable --now npiperelay.service
+
+echo "✅️ WSL 1Password SSH agent relay is set up!"

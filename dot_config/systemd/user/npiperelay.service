@@ -1,0 +1,10 @@
+[Unit]
+Description=Relay SSH agent socket to Windows 1Password via npiperelay
+
+[Service]
+ExecStartPre=/bin/rm -f %h/.ssh/agent.sock
+ExecStart=/bin/sh -c 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"; PATH="%h/.local/bin:$PATH"; exec socat UNIX-LISTEN:%h/.ssh/agent.sock,fork EXEC:"npiperelay.exe -ei -s //./pipe/openssh-ssh-agent",nofork'
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

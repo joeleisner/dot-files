@@ -1,0 +1,35 @@
+{{- if (and (hasKey . "has_ipod") .has_ipod) }}
+#!/bin/bash
+
+NO_ARTWORK=0
+POSITIONAL=()
+
+for arg in "$@"; do
+    case "$arg" in
+        --no-artwork) NO_ARTWORK=1 ;;
+        *) POSITIONAL+=("$arg") ;;
+    esac
+done
+
+if [[ ${#POSITIONAL[@]} -lt 2 ]]; then
+    echo "Usage: isync [--no-artwork] <source_directory> <destination_directory>"
+    exit 1
+fi
+
+SRC="${POSITIONAL[0]}"
+DEST="${POSITIONAL[1]}"
+
+# Ensure source has a trailing slash so rsync syncs contents, not the folder itself
+[[ "${SRC}" != */ ]] && SRC="${SRC}/"
+
+RSYNC_OPTS=(-av --delete --size-only --progress)
+[[ $NO_ARTWORK -eq 1 ]] && RSYNC_OPTS+=(
+    --exclude='*.jpg' --exclude='*.jpeg'
+    --exclude='*.png' --exclude='*.gif'
+    --exclude='*.webp' --exclude='*.bmp'
+    --delete-excluded
+)
+
+rsync "${RSYNC_OPTS[@]}" "$SRC" "$DEST"
+
+{{- end }}

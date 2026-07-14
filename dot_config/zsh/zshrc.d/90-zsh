@@ -1,0 +1,7 @@
+# 1Password SSH agent setup
+export SSH_AUTH_SOCK="$HOME/.ssh/agent.sock"
+
+# Mise activation for ZSH
+if command -v mise >/dev/null 2>&1; then
+    eval "$(mise activate zsh)"
+fi

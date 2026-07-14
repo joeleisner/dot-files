@@ -1,0 +1,9 @@
+[settings]
+legacy_version_file=true
+
+[tools]
+bun = "latest"
+deno = "latest"
+node = "lts"
+pnpm = "latest"
+watchexec = "latest"

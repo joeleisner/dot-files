@@ -1,0 +1,19 @@
+# Core Prompt & Navigation
+brew "starship"
+brew "zoxide"
+brew "direnv"
+
+# Environment & Runtime Manager
+brew "mise"
+
+# Modern CLI Replacements
+brew "eza"
+brew "ugrep"
+brew "bat"
+brew "prettyping"
+
+# Bash Hook Dependency
+brew "bash-preexec"
+
+# WSL + 1Password SSH Agent Relay
+brew "socat"

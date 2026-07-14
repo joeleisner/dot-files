@@ -1,0 +1,51 @@
+# eza > ls
+if command -v eza >/dev/null 2>&1; then
+    alias ls='eza'
+    alias ll='eza -l --icons=auto --group-directories-first'
+    alias l.='eza -d .*'
+    alias l1='eza -1'
+fi
+
+# ugrep > grep
+if command -v ug >/dev/null 2>&1; then
+    alias grep='ug'
+    alias egrep='ug -E'
+    alias fgrep='ug -F'
+    alias xzgrep='ug -z'
+    alias xzegrep='ug -zE'
+    alias xzfgrep='ug -zF'
+fi
+
+# bat > cat
+if command -v bat >/dev/null 2>&1; then
+    alias cat='bat --style=plain --pager=never'
+fi
+
+# prettyping > ping
+if command -v prettyping >/dev/null 2>&1; then
+    alias ping="prettyping"
+fi
+
+# Force wget to respect XDG specifications
+if command -v wget >/dev/null 2>&1; then
+    alias wget='wget --hsts-file="$XDG_DATA_HOME/wget/hsts"'
+fi
+
+# Detect current shell name
+if [ -n "$BASH_VERSION" ]; then
+    _bling_shell=bash
+elif [ -n "$ZSH_VERSION" ]; then
+    _bling_shell=zsh
+fi
+
+# bash needs bash-preexec for direnv's PROMPT_COMMAND hook; zsh has native hooks
+if [ "$_bling_shell" = "bash" ]; then
+    [ -f /etc/profile.d/bash-preexec.sh ] && . /etc/profile.d/bash-preexec.sh
+    [ -f "${HOMEBREW_PREFIX}/etc/profile.d/bash-preexec.sh" ] && . "${HOMEBREW_PREFIX}/etc/profile.d/bash-preexec.sh"
+fi
+
+command -v direnv >/dev/null 2>&1 && eval "$(direnv hook "$_bling_shell")"
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init "$_bling_shell")"
+command -v starship >/dev/null 2>&1 && eval "$(starship init "$_bling_shell")"
+
+unset _bling_shell

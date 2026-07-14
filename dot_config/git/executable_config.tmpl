@@ -1,0 +1,26 @@
+{{- $onepasswordCmd := includeTemplate "onepassword-cmd" . -}}
+[user]
+	name = {{ .git_name | quote }}
+	email = {{ .git_email | quote }}
+{{- if lookPath $onepasswordCmd }}
+	signingkey = {{ onepasswordRead .git_signing_key | trim }}
+{{- end }}
+
+[commit]
+	gpgsign = {{ if lookPath $onepasswordCmd }}true{{ else }}false{{ end }}
+
+[gpg]
+	format = ssh
+
+[gpg "ssh"]
+{{- if and (eq .chezmoi.os "linux") (contains "microsoft" (lower .chezmoi.kernel.osrelease)) }}
+	program = "op-ssh-sign.exe"
+{{- else }}
+	program = "op-ssh-sign"
+{{- end }}
+
+[init]
+	defaultBranch = main
+
+[push]
+	autoSetupRemote = true

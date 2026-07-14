@@ -1,0 +1,16 @@
+{{- if (and (hasKey . "has_ipod") .has_ipod) }}
+#!/bin/bash
+
+# Recursively run icover in every directory containing FLAC or MP3 files.
+# Usage: icover-r [root_dir]   (defaults to current directory)
+
+ROOT="${1:-.}"
+
+# Find unique directories containing audio files, null-delimited to handle spaces
+while IFS= read -r -d '' dir; do
+    echo "==> $dir"
+    (cd "$dir" && icover) || echo "  [icover failed in: $dir]"
+    echo
+done < <(find "$ROOT" -type f \( -iname "*.flac" -o -iname "*.mp3" \) -printf '%h\0' | sort -zu)
+
+{{- end }}
