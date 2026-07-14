@@ -1,7 +1,4 @@
-{{- $onepasswordCmd := "op" -}}
-{{- if and (eq .chezmoi.os "linux") (contains "microsoft" (lower .chezmoi.kernel.osrelease)) -}}
-{{- $onepasswordCmd = "op.exe" -}}
-{{- end -}}
+{{- $onepasswordCmd := includeTemplate "onepassword-cmd" . -}}
 
 {{- /* Prompt for details up front during initialization */ -}}
 {{- $gitName := promptStringOnce . "git_name" "Enter git name" -}}

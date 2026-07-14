@@ -1,10 +1,13 @@
+{{- $onepasswordCmd := includeTemplate "onepassword-cmd" . -}}
 [user]
 	name = {{ .git_name | quote }}
 	email = {{ .git_email | quote }}
+{{- if lookPath $onepasswordCmd }}
 	signingkey = {{ onepasswordRead .git_signing_key | trim }}
+{{- end }}
 
 [commit]
-	gpgsign = true
+	gpgsign = {{ if lookPath $onepasswordCmd }}true{{ else }}false{{ end }}
 
 [gpg]
 	format = ssh

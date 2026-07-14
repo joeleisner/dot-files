@@ -1,4 +1,7 @@
+{{- $onepasswordCmd := includeTemplate "onepassword-cmd" . -}}
+{{- if lookPath $onepasswordCmd }}
 {{ onepasswordRead .ssh_conf }}
+{{- end }}
 
 Host *
 	IdentityAgent env:SSH_AUTH_SOCK
