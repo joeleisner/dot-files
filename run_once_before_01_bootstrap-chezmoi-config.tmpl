@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+# Define the path to the local config file
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
+
+# Skip if it already exists
+if [ -f "$CONFIG_FILE" ]; then
+	exit 0
+fi
+
+mkdir -p "$(dirname "$CONFIG_FILE")"
+
+# Prompt for the machine-specific details
+GIT_NAME=$(chezmoi promptString "Enter git name")
+GIT_EMAIL=$(chezmoi promptString "Enter git email")
+GIT_SIGNING_KEY_URI=$(chezmoi promptString "Enter 1Password git signing key URI")
+SSH_URI=$(chezmoi promptString "Enter 1Password SSH config URI")
+
+# Determine the right `op` command for the env
+OP_CMD="op"
+if [[ "$(uname -r)" == *"Microsoft"* || "$(uname -r)" == *"microsoft"* ]]; then
+	OP_CMD="op.exe"
+fi
+
+cat > "$CONFIG_FILE" <<'EOF'
+[onePassword]
+	command = "${OP_CMD}"
+[data]
+	# Git Identity
+	git_name = "${GIT_NAME}"
+	git_email = "${GIT_EMAIL}"
+	git_signing_key = "${GIT_SIGNING_KEY_URI}"
+	# SSH Config (1Password URI)
+	ssh_conf = "${SSH_URI}"
+	# Optional features
+	has_ipod = false
+	is_kde = false
+	at_home = false
+EOF
+
+echo "✅️ Seeded default chezmoi config at $CONFIG_FILE"

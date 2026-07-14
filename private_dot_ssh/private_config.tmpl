@@ -1,3 +1,5 @@
+{{ onepasswordRead .ssh_conf }}
+
 Host *
 	IdentityAgent env:SSH_AUTH_SOCK
 	ForwardAgent yes

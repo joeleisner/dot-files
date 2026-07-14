@@ -15,6 +15,7 @@
 		"**/symlink_*": "ignore",
 		// Properties
 		"**/npmrc": "properties",
+		"**/git/executable_config.tmpl": "properties",
 		// SSH config
 		"private_config": "ssh-config",
 		"Brewfile-*": "ruby",

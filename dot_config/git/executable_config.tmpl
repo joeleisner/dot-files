@@ -1,0 +1,23 @@
+[user]
+	name = {{ .git_name | quote }}
+	email = {{ .git_email | quote }}
+	signingkey = {{ onepasswordRead .git_signing_key | trim }}
+
+[commit]
+	gpgsign = true
+
+[gpg]
+	format = ssh
+
+[gpg "ssh"]
+{{- if and (eq .chezmoi.os "linux") (contains "microsoft" (lower .chezmoi.kernel.osrelease)) }}
+	program = "op-ssh-sign.exe"
+{{- else }}
+	program = "op-ssh-sign"
+{{- end }}
+
+[init]
+	defaultBranch = main
+
+[push]
+	autoSetupRemote = true
