@@ -4,7 +4,7 @@
 {{- end }}
 
 Host *
-	IdentityAgent env:SSH_AUTH_SOCK
+	IdentityAgent SSH_AUTH_SOCK
 	ForwardAgent yes
 	ControlMaster auto
 	ControlPath ~/.ssh/control/%r@%h:%p
