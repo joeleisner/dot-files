@@ -17,7 +17,9 @@
 		"**/npmrc": "properties",
 		"**/git/executable_config.tmpl": "properties",
 		// SSH config
-		"private_config": "ssh-config",
+		"private_config.tmpl": "ssh-config",
 		"Brewfile-*": "ruby",
+		// Ignore
+		".chezmoiignore": "ignore",
 	}
 }
