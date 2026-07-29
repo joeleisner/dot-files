@@ -11,13 +11,13 @@
 # ============================================
 
 # Music directories
-MUSIC_SRC="/var/mnt/music"
-MUSIC_DEST="/run/media/joel/JOEL_S IPOD/Music/"
+MUSIC_SRC="{{ .ipod_music_src }}"
+MUSIC_DEST="{{ .ipod_mount_path }}/Music/"
 
 # Podcast directories
-PODCAST_SRC="/var/mnt/podcasts"
+PODCAST_SRC="{{ .ipod_podcast_src }}"
 PODCAST_STAGING="$HOME/.local/share/podify/podcasts"
-PODCAST_DEST="/run/media/joel/JOEL_S IPOD/Podcasts/"
+PODCAST_DEST="{{ .ipod_mount_path }}/Podcasts/"
 
 # ------------------------------------------
 # Music: process in-place, sync to iPod

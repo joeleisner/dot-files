@@ -19,8 +19,8 @@ case "$TARGET_INPUT" in
 esac
 
 # Send commands to both monitors simultaneously
-/usr/bin/ddcutil --bus=9 setvcp 60 "$HEX_VAL_1" &
-/usr/bin/ddcutil --bus=10 setvcp 60 "$HEX_VAL_2" &
+/usr/bin/ddcutil --bus={{ .monitor_bus_1 }} setvcp 60 "$HEX_VAL_1" &
+/usr/bin/ddcutil --bus={{ .monitor_bus_2 }} setvcp 60 "$HEX_VAL_2" &
 
 wait
 

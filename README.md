@@ -35,14 +35,14 @@ sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- init --apply https://github.c
 
 This configuration includes specialized scripts for my environments and locations. These are disabled by default and entirely optional.
 
-To enable or disable these features, you can configure your local Chezmoi state variables.
+`chezmoi init` prompts for each module below. Answering yes to a module also prompts for any machine-specific paths it needs (mount points, source directories, device paths, etc.), so those never need to be hardcoded or hand-edited.
 
 ### Available Modules
 
-| Module | Description |
-| :--- | :--- |
-| `has_ipod` | Custom shell utilities for batch-tagging music, syncing FLAC files, and managing Rockbox iPod builds. |
-| `is_kde` | Automation scripts for the KDE Plasma desktop. |
-| `at_home` | Automation scripts for at-home stuff |
+| Module | Description | Paths prompted when enabled |
+| :--- | :--- | :---
+| `has_ipod` | Custom shell utilities for batch-tagging music, syncing FLAC files, and managing Rockbox iPod builds. | `ipod_music_src`, `ipod_podcast_src`, `ipod_mount_path` |
+| `is_kde` | Automation scripts for the KDE Plasma desktop. | none |
+| `at_home` | Automation scripts for at-home stuff (monitor/desktop switching, peripheral KVM switch). | `peripheral_switch_device`, `monitor_bus_1`, `monitor_bus_2` |
 
 ---

@@ -1,0 +1,19 @@
+{{- if (and (hasKey . "at_home") .at_home) }}
+#!/usr/bin/env bash
+set -euo pipefail
+
+DEVICE="{{ .peripheral_switch_device }}"
+
+if [[ ! -e "$DEVICE" ]]; then
+	echo "Error: Device $DEVICE not found!" >&2
+	exit 1
+fi
+
+stty -F "$DEVICE" 9600 cs8 -cstopb -parenb
+
+printf '\xA0\x01\x01\xA2' > "$DEVICE"
+sleep 0.2
+printf '\xA0\x01\x00\xA1' > "$DEVICE"
+
+echo "Peripherals were switched successfully."
+{{- end }}

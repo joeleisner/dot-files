@@ -6,6 +6,29 @@
 {{- $gitSigningKey := promptStringOnce . "git_signing_key_uri" "Enter 1Password git signing key URI" -}}
 {{- $sshConf := promptStringOnce . "ssh_conf_secret" "Enter 1Password ssh config URI" -}}
 
+{{- /* Optional features: prompt to enable, then prompt for any paths each feature needs */ -}}
+{{- $hasIpod := promptBoolOnce . "has_ipod" "Enable iPod tools" false -}}
+{{- $isKde := promptBoolOnce . "is_kde" "Enable KDE automation" false -}}
+{{- $atHome := promptBoolOnce . "at_home" "Enable at-home automation" false -}}
+
+{{- $ipodMusicSrc := "" -}}
+{{- $ipodPodcastSrc := "" -}}
+{{- $ipodMountPath := "" -}}
+{{- if $hasIpod -}}
+{{- $ipodMusicSrc = promptStringOnce . "ipod_music_src" "iPod: music source directory" "/var/mnt/music" -}}
+{{- $ipodPodcastSrc = promptStringOnce . "ipod_podcast_src" "iPod: podcast source directory" "/var/mnt/podcasts" -}}
+{{- $ipodMountPath = promptStringOnce . "ipod_mount_path" "iPod: mount path" "/run/media/joel/JOEL_S IPOD" -}}
+{{- end -}}
+
+{{- $peripheralSwitchDevice := "" -}}
+{{- $monitorBus1 := "" -}}
+{{- $monitorBus2 := "" -}}
+{{- if $atHome -}}
+{{- $peripheralSwitchDevice = promptStringOnce . "peripheral_switch_device" "At-home: peripheral switch serial device" "/dev/ttyUSB0" -}}
+{{- $monitorBus1 = promptStringOnce . "monitor_bus_1" "At-home: first monitor's ddcutil bus" "9" -}}
+{{- $monitorBus2 = promptStringOnce . "monitor_bus_2" "At-home: second monitor's ddcutil bus" "10" -}}
+{{- end -}}
+
 [onePassword]
 	command = {{ $onepasswordCmd | quote }}
 
@@ -17,6 +40,14 @@
 	# SSH Config (1Password URI)
 	ssh_conf = {{ $sshConf | quote }}
 	# Optional features
-	has_ipod = false
-	is_kde = false
-	at_home = false
+	has_ipod = {{ $hasIpod }}
+	is_kde = {{ $isKde }}
+	at_home = {{ $atHome }}
+	# iPod paths (only used when has_ipod is true)
+	ipod_music_src = {{ $ipodMusicSrc | quote }}
+	ipod_podcast_src = {{ $ipodPodcastSrc | quote }}
+	ipod_mount_path = {{ $ipodMountPath | quote }}
+	# At-home paths (only used when at_home is true)
+	peripheral_switch_device = {{ $peripheralSwitchDevice | quote }}
+	monitor_bus_1 = {{ $monitorBus1 | quote }}
+	monitor_bus_2 = {{ $monitorBus2 | quote }}
