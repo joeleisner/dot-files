@@ -13,14 +13,16 @@ warn() { echo "⚠️  $*" >&2; }
 fail() { echo "❌ $*" >&2; }
 is_wsl() { [ -n "${WSL_DISTRO_NAME:-}" ]; }
 
+# The op CLI alone doesn't mean an agent is expected (servers use it for secrets),
+# so look for the desktop app, its config, or an already-present socket.
 has_onepassword() {
 	if is_wsl; then
 		[ -f "$RELAY_UNIT" ] && return 0
 	fi
-	command -v op >/dev/null 2>&1 && return 0
-	command -v op.exe >/dev/null 2>&1 && return 0
 	command -v 1password >/dev/null 2>&1 && return 0
 	[ -d /Applications/1Password.app ] && return 0
+	[ -d "$HOME/.config/1Password" ] && return 0
+	[ -S "$SOCK" ] && return 0
 	return 1
 }
 
@@ -29,6 +31,8 @@ repair_macos_symlink() {
 	mkdir -p "$HOME/.1password"
 	if [ -L "$SOCK" ]; then
 		[ "$(readlink "$SOCK")" = "$MAC_SOCK" ] || ln -sfn "$MAC_SOCK" "$SOCK"
+	elif [ -S "$SOCK" ]; then
+		:  # a real socket (1Password created it itself); nothing to repair
 	elif [ -e "$SOCK" ]; then
 		warn "$SOCK exists and is not a symlink; leaving it alone. Remove it to let this script link it to 1Password's socket."
 	else
@@ -80,9 +84,21 @@ repair_wsl_relay() {
 	mkdir -p "$(dirname "$npiperelay_link")"
 	ln -sf "$npiperelay_exe" "$npiperelay_link"
 
+	if ! systemctl --user show-environment >/dev/null 2>&1; then
+		fail "systemd isn't running for your user in this WSL distro, so the 1Password agent relay can't be managed. Set \"systemd=true\" under [boot] in /etc/wsl.conf, then run \"wsl --shutdown\" from Windows and reopen WSL."
+		return
+	fi
+
 	systemctl --user daemon-reload
 	systemctl --user enable --now npiperelay.service
-	if [ ! -S "$SOCK" ]; then
+
+	# Restart when the socket is missing, or exists but nothing healthy is behind it
+	local dead=0
+	if [ -S "$SOCK" ]; then
+		SSH_AUTH_SOCK="$SOCK" ssh-add -l >/dev/null 2>&1
+		[ $? -eq 2 ] && dead=1
+	fi
+	if [ ! -S "$SOCK" ] || [ "$dead" -eq 1 ]; then
 		systemctl --user restart npiperelay.service
 		local i
 		for i in 1 2 3 4 5 6; do
@@ -90,9 +106,6 @@ repair_wsl_relay() {
 			sleep 0.5
 		done
 	fi
-
-	# Old relay path from before the canonical socket moved
-	rm -f "$HOME/.ssh/agent.sock"
 }
 
 verify_agent() {
