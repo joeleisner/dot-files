@@ -2,3 +2,4 @@ README.md
 {{ if not (and (eq .chezmoi.os "linux") (contains "microsoft" (lower .chezmoi.kernel.osrelease))) -}}
 .config/systemd/user/npiperelay.service
 {{ end -}}
+docs
