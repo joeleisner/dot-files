@@ -1,0 +1,4 @@
+{{- $onepasswordCmd := includeTemplate "onepassword-cmd" . -}}
+{{- if lookPath $onepasswordCmd -}}
+{{ .git_email }} namespaces="git" {{ onepasswordRead .git_signing_key | trim }}
+{{ end -}}

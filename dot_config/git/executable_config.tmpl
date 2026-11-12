@@ -18,6 +18,9 @@
 	format = ssh
 
 [gpg "ssh"]
+{{- if lookPath $onepasswordCmd }}
+	allowedSignersFile = ~/.config/git/allowed_signers
+{{- end }}
 {{- if and (eq .chezmoi.os "linux") (contains "microsoft" (lower .chezmoi.kernel.osrelease)) }}
 	program = "op-ssh-sign.exe"
 {{- else }}
