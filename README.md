@@ -43,6 +43,12 @@ This repo only tracks what the harness itself needs. Add your own config by drop
 
 **SSH ordering matters.** ssh uses the first value it finds for each option, and the harness's `99-defaults.conf` (the `Host *` defaults) is last. Name your own files with a prefix **lower than 99** (e.g. `50-work.conf`). A file like `work.conf` sorts after `99-` and loses to the defaults.
 
+### Overrides
+
+Set these in a `bashrc.d` file that sorts before `25-bling` (e.g. `01-env`):
+
+- `ZOXIDE_CMD`: the command zoxide defines. Defaults to `z`; `ZOXIDE_CMD=cd` makes `cd` smart instead (and `z` is no longer defined). Note that `cd -P`/`cd -L` don't work with it, and a mistyped directory jumps to a frequent match instead of failing.
+
 ### Linking external projects
 
 [GNU Stow](https://www.gnu.org/software/stow/) is installed with the Brewfile. Use `--no-folding` so Stow links individual files instead of replacing a directory with one symlink, which would collide with the files the harness owns:
