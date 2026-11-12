@@ -4,7 +4,6 @@
 {{- $gitName := promptStringOnce . "git_name" "Enter git name" -}}
 {{- $gitEmail := promptStringOnce . "git_email" "Enter git email" -}}
 {{- $gitSigningKey := promptStringOnce . "git_signing_key_uri" "Enter 1Password git signing key URI" -}}
-{{- $sshConf := promptStringOnce . "ssh_conf_secret" "Enter 1Password ssh config URI" -}}
 
 [onePassword]
 	command = {{ $onepasswordCmd | quote }}
@@ -14,5 +13,3 @@
 	git_name = {{ $gitName | quote }}
 	git_email = {{ $gitEmail | quote }}
 	git_signing_key = {{ $gitSigningKey | quote }}
-	# SSH Config (1Password URI)
-	ssh_conf = {{ $sshConf | quote }}
