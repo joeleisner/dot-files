@@ -1,0 +1,21 @@
+# zoxide must init after mise (90-linux / 90-zsh): in bash, mise wraps cd, so whichever
+# defines cd last wins. ZOXIDE_CMD picks the command zoxide defines (default z).
+if command -v zoxide >/dev/null 2>&1; then
+    if [ -n "$BASH_VERSION" ]; then
+        _zoxide_shell=bash
+    elif [ -n "$ZSH_VERSION" ]; then
+        _zoxide_shell=zsh
+    fi
+
+    if [ -n "$_zoxide_shell" ]; then
+        eval "$(zoxide init "$_zoxide_shell" --cmd "${ZOXIDE_CMD:-z}")"
+
+        # bash: route zoxide's directory changes through mise's chpwd hooks so the
+        # project's mise environment applies immediately
+        if [ "$_zoxide_shell" = "bash" ] && declare -F __zsh_like_cd >/dev/null 2>&1; then
+            __zoxide_cd() { __zsh_like_cd cd -- "$@"; }
+        fi
+    fi
+
+    unset _zoxide_shell
+fi
