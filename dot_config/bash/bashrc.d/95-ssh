@@ -1,4 +1,5 @@
-# Add keys + verify 1Password SSH agent status
-if command -v ssh-add &> /dev/null && [ -S "$SSH_AUTH_SOCK" ]; then
-	ssh-add -l &> /dev/null || echo "⚠️ Warning: No keys found. Ensure 1Password is unlocked."
+# Verify the 1Password SSH agent has keys (only where we use its socket directly,
+# and not in ssh sessions, where the agent may be forwarded)
+if [ -z "$SSH_CONNECTION" ] && command -v ssh-add &> /dev/null && [ -S "$HOME/.1password/agent.sock" ]; then
+	SSH_AUTH_SOCK="$HOME/.1password/agent.sock" ssh-add -l &> /dev/null || echo "⚠️ Warning: No keys found. Ensure 1Password is unlocked."
 fi
