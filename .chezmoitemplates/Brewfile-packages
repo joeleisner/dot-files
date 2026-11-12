@@ -17,3 +17,6 @@ brew "bash-preexec"
 
 # WSL + 1Password SSH Agent Relay
 brew "socat"
+
+# Linking external projects into bashrc.d / config.d
+brew "stow"
