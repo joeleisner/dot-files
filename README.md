@@ -47,7 +47,7 @@ This repo only tracks what the harness itself needs. Add your own config by drop
 
 Set these in a `bashrc.d` file that sorts before the file that reads them (e.g. `01-env`):
 
-- `ZOXIDE_CMD`: the command zoxide defines. Defaults to `z`; `ZOXIDE_CMD=cd` makes `cd` smart instead (and `z` is no longer defined). Note that `cd -P`/`cd -L` don't work with it, and a mistyped directory jumps to a frequent match instead of failing.
+- `ZOXIDE_CMD`: the command zoxide defines. Defaults to `z`; `ZOXIDE_CMD=cd` makes `cd` smart instead (and `z` is no longer defined). Note that `cd -P`/`cd -L` don't work with it, and a mistyped directory jumps to a frequent match instead of failing. In non-interactive shells (agent shells such as Claude Code, scripts that source your config) `cd` stays the plain builtin, so a typo fails instead of jumping and zoxide's prompt-hook check never warns.
 
 ### Linking external projects
 
