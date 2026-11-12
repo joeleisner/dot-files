@@ -18,11 +18,11 @@
 	format = ssh
 
 [gpg "ssh"]
-{{- if and (eq .chezmoi.os "linux") (contains "microsoft" (lower .chezmoi.kernel.osrelease)) }}
-	program = "op-ssh-sign.exe"
-{{- else }}
-	program = "op-ssh-sign"
+{{- if lookPath $onepasswordCmd }}
+	allowedSignersFile = ~/.config/git/allowed_signers
 {{- end }}
+	# On WSL this is a wrapper in ~/.local/bin that forwards signing to op-ssh-sign.exe
+	program = "op-ssh-sign"
 
 [init]
 	defaultBranch = main

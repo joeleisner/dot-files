@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# WSL only. Git uses gpg.ssh.program for both signing and verifying.
+# Signing needs 1Password on the Windows side (op-ssh-sign.exe); verifying only
+# needs ssh-keygen, and the Windows program can't read Linux paths like
+# ~/.config/git/allowed_signers anyway.
+mode=
+prev=
+for arg in "$@"; do
+	if [ "$prev" = "-Y" ]; then
+		mode=$arg
+		break
+	fi
+	prev=$arg
+done
+
+if [ "$mode" = "sign" ]; then
+	exec op-ssh-sign.exe "$@"
+fi
+exec ssh-keygen "$@"
