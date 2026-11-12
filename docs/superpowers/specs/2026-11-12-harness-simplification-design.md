@@ -70,8 +70,7 @@ Rules:
 - `Include` first (ssh uses first-obtained value per option, so ordering matters).
 - `~/.ssh/config.d/` is created by chezmoi (private, 0700) and is the extension point. Chezmoi must not delete unmanaged files there.
 - Tracked files, named to sort by the same numeric-prefix convention as `bashrc.d`:
-  - `00-1password.conf`: `IdentityAgent ~/.1password/agent.sock`. Static, no OS conditionals.
-  - `99-defaults.conf`: a `Host *` block with:
+  - `99-defaults.conf`: a `Host *` block with (and, after it, `Match exec "test -S %d/.1password/agent.sock"` + `IdentityAgent %d/.1password/agent.sock`, so it is a default users can override earlier and is ignored on machines without 1Password; changed after final review):
     - `ControlMaster auto`
     - `ControlPath ~/.ssh/control/%C` (hash token; avoids the ~104-char unix-socket limit)
     - `ControlPersist 10m`
