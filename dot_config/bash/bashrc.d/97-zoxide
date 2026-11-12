@@ -15,6 +15,21 @@ if command -v zoxide >/dev/null 2>&1; then
         if [ "$_zoxide_shell" = "bash" ] && declare -F __zsh_like_cd >/dev/null 2>&1; then
             __zoxide_cd() { __zsh_like_cd cd -- "$@"; }
         fi
+
+        # Agent and other non-interactive shells have no prompt, so zoxide's hook never
+        # runs there, and its fuzzy fallback would turn a mistyped cd into a silent jump.
+        # Checked per call: agent shells replay functions captured from a shell like this.
+        if [ "${ZOXIDE_CMD:-z}" = "cd" ]; then
+            cd() {
+                if [[ $- == *i* ]]; then
+                    __zoxide_z "$@"
+                elif [ -n "$BASH_VERSION" ] && declare -F __zsh_like_cd >/dev/null 2>&1; then
+                    __zsh_like_cd cd "$@"
+                else
+                    builtin cd "$@"
+                fi
+            }
+        fi
     fi
 
     unset _zoxide_shell
