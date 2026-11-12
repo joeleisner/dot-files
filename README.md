@@ -45,7 +45,7 @@ This repo only tracks what the harness itself needs. Add your own config by drop
 
 ### Overrides
 
-Set these in a `bashrc.d` file that sorts before `25-bling` (e.g. `01-env`):
+Set these in a `bashrc.d` file that sorts before the file that reads them (e.g. `01-env`):
 
 - `ZOXIDE_CMD`: the command zoxide defines. Defaults to `z`; `ZOXIDE_CMD=cd` makes `cd` smart instead (and `z` is no longer defined). Note that `cd -P`/`cd -L` don't work with it, and a mistyped directory jumps to a frequent match instead of failing.
 
