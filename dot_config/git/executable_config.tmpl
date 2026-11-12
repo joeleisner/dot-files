@@ -9,6 +9,11 @@
 [commit]
 	gpgsign = {{ if lookPath $onepasswordCmd }}true{{ else }}false{{ end }}
 
+[core]
+	# Git opens a short-lived connection per operation; skip ssh multiplexing so
+	# it never races for (or hangs on) a ControlMaster socket
+	sshCommand = ssh -o ControlMaster=no -o ControlPath=none
+
 [gpg]
 	format = ssh
 
