@@ -4,6 +4,12 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_CACHE_HOME="$HOME/.cache"
 
+# 1Password SSH agent: same path on every platform (native Linux, macOS symlink,
+# WSL relay). Skipped in ssh sessions so a forwarded agent is never clobbered.
+if [ -z "$SSH_CONNECTION" ] && [ -S "$HOME/.1password/agent.sock" ]; then
+	export SSH_AUTH_SOCK="$HOME/.1password/agent.sock"
+fi
+
 # Cargo installations location
 export CARGO_HOME="$XDG_DATA_HOME/cargo"
 
