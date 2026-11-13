@@ -30,3 +30,8 @@ export HISTCONTROL="ignorespace:ignoredups"
 # Force less to respect XDG specifications
 export LESSHISTFILE="$XDG_STATE_HOME/less/history"
 mkdir -p "$(dirname "$LESSHISTFILE")"
+
+# 1Password CLI: use biometric unlock (Touch ID) on macOS
+case "$(uname -s)" in
+	Darwin) export OP_BIOMETRIC_UNLOCK_ENABLED=true ;;
+esac
