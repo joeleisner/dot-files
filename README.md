@@ -40,7 +40,7 @@ Every `chezmoi apply` also checks the 1Password SSH agent socket (`~/.1password/
 tmux, Helix (`hx`, the default `EDITOR`) and fzf (needed by zoxide's `zi`) are installed with the packages. `proj` ties them to your projects:
 
 ```sh
-proj myapp       # cd to the project and run the agent there (resumes its last conversation)
+proj myapp       # cd to the project and run the agent there (resumes its last conversation, or starts one in a new project)
 proj -s myapp    # create or reattach myapp's tmux session: edit (hx), agent, shell
 proj -s -d myapp # same, but create it in the background without attaching
 ```
@@ -77,7 +77,7 @@ Set these in a `bashrc.d` file that sorts before the file that reads them (e.g. 
 
 - `ZOXIDE_CMD`: the command zoxide defines. Defaults to `z`; `ZOXIDE_CMD=cd` makes `cd` smart instead (and `z` is no longer defined). Note that `cd -P`/`cd -L` don't work with it, and a mistyped directory jumps to a frequent match instead of failing. In non-interactive shells (agent shells such as Claude Code, scripts that source your config) `cd` stays the plain builtin, so a typo fails instead of jumping and zoxide's prompt-hook check never warns.
 - `EDITOR`/`VISUAL`: set to `hx` unconditionally, because distros pre-set `EDITOR` (Fedora sets nano) so a "keep any existing value" guard never fires. Export your own in a file that sorts after `00-env` (e.g. `50-editor`) to change them.
-- `PROJ_AGENT`: (must be `export`ed, since `proj` is a separate process) the command `proj` runs as the agent, in light mode and in the session's `agent` window. Defaults to `claude --continue`.
+- `PROJ_AGENT`: (must be `export`ed, since `proj` is a separate process) the command `proj` runs as the agent, in light mode and in the session's `agent` window. Defaults to `claude --continue || claude` (resume the last conversation, or start a fresh one in a new project).
 
 ### Linking external projects
 
