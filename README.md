@@ -76,6 +76,7 @@ This repo only tracks what the harness itself needs. Add your own config by drop
 Set these in a `bashrc.d` file that sorts before the file that reads them (e.g. `01-env`):
 
 - `ZOXIDE_CMD`: the command zoxide defines. Defaults to `z`; `ZOXIDE_CMD=cd` makes `cd` smart instead (and `z` is no longer defined). Note that `cd -P`/`cd -L` don't work with it, and a mistyped directory jumps to a frequent match instead of failing. In non-interactive shells (agent shells such as Claude Code, scripts that source your config) `cd` stays the plain builtin, so a typo fails instead of jumping and zoxide's prompt-hook check never warns.
+- `EDITOR`/`VISUAL`: set to `hx` unconditionally, because distros pre-set `EDITOR` (Fedora sets nano) so a "keep any existing value" guard never fires. Export your own in a file that sorts after `00-env` (e.g. `50-editor`) to change them.
 - `PROJ_AGENT`: (must be `export`ed, since `proj` is a separate process) the command `proj` runs as the agent, in light mode and in the session's `agent` window. Defaults to `claude --continue`.
 
 ### Linking external projects
