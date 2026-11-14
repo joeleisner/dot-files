@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+#
+# proj: get into a project in one command.
+#
+#   proj [project]       cd to the project and run $PROJ_AGENT there
+#   proj -s [project]    create or reattach the project's tmux session
+#   proj -s -d [project] create the session without attaching
+#
+# "project" is a directory path, or a name zoxide knows. Defaults to the current
+# directory. PROJ_AGENT defaults to "claude --continue".
+
+set -euo pipefail
+
+: "${PROJ_AGENT:=claude --continue}"
+
+usage() {
+	cat <<'USAGE'
+Usage: proj [-s [-d]] [project]
+
+  (no flags)  cd to the project and run $PROJ_AGENT (default: claude --continue)
+  -s          create or reattach the project's tmux session (edit, agent, shell)
+  -d          with -s: create the session but don't attach
+  -h          show this help
+
+project is a directory, or a name zoxide knows; defaults to the current directory.
+USAGE
+}
+
+die() {
+	echo "proj: $*" >&2
+	exit 1
+}
+
+# Print the absolute path of the project directory.
+resolve_dir() {
+	local arg="${1-}" found
+	if [[ -z "$arg" ]]; then
+		pwd -P
+	elif [[ -d "$arg" ]]; then
+		(cd "$arg" && pwd -P)
+	elif command -v zoxide >/dev/null 2>&1 && found=$(zoxide query -- "$arg" 2>/dev/null); then
+		echo "$found"
+	else
+		die "can't find a project called '$arg'"
+	fi
+}
+
+# Print the tmux session name for a directory. tmux forbids '.' and ':' in names.
+# If a session of that name already belongs to a different directory, disambiguate.
+session_name() {
+	local dir="$1" base name
+	base=$(basename "$dir")
+	name="${base//[.:]/_}"
+	if tmux has-session -t "=$name" 2>/dev/null &&
+		[[ "$(tmux display-message -p -t "=$name:" '#{session_path}')" != "$dir" ]]; then
+		name="$name-$(printf %s "$dir" | cksum | cut -c1-4)"
+	fi
+	echo "$name"
+}
+
+ensure_session() {
+	local name="$1" dir="$2"
+	tmux has-session -t "=$name" 2>/dev/null && return 0
+	tmux new-session -d -s "$name" -n edit -c "$dir" hx
+	# The agent window drops to a shell when the agent exits, so it isn't lost.
+	tmux new-window -t "=$name:" -n agent -c "$dir" "$PROJ_AGENT; exec \"\${SHELL:-bash}\""
+	tmux new-window -t "=$name:" -n shell -c "$dir"
+	tmux select-window -t "=$name:edit"
+}
+
+go_to_session() {
+	if [[ -n "${TMUX-}" ]]; then
+		tmux switch-client -t "=$1"
+	else
+		tmux attach-session -t "=$1"
+	fi
+}
+
+main() {
+	local session=0 detach=0 opt
+	while getopts "sdh" opt; do
+		case "$opt" in
+			s) session=1 ;;
+			d) detach=1 ;;
+			h) usage; exit 0 ;;
+			*) usage >&2; exit 2 ;;
+		esac
+	done
+	shift $((OPTIND - 1))
+
+	((detach == 0 || session == 1)) || die "-d only makes sense with -s"
+
+	local dir
+	dir=$(resolve_dir "${1-}")
+
+	if ((session == 0)); then
+		cd "$dir"
+		exec sh -c "$PROJ_AGENT"
+	fi
+
+	command -v tmux >/dev/null 2>&1 || die "tmux isn't installed"
+	local name
+	name=$(session_name "$dir")
+	ensure_session "$name" "$dir"
+	((detach == 1)) || go_to_session "$name"
+}
+
+main "$@"
