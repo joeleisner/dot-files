@@ -7,17 +7,17 @@
 #   proj -s -d [project] create the session without attaching
 #
 # "project" is a directory path, or a name zoxide knows. Defaults to the current
-# directory. PROJ_AGENT defaults to "claude --continue".
+# directory. PROJ_AGENT defaults to "claude --continue || claude".
 
 set -euo pipefail
 
-: "${PROJ_AGENT:=claude --continue}"
+: "${PROJ_AGENT:=claude --continue || claude}"
 
 usage() {
 	cat <<'USAGE'
 Usage: proj [-s [-d]] [project]
 
-  (no flags)  cd to the project and run $PROJ_AGENT (default: claude --continue)
+  (no flags)  cd to the project and run $PROJ_AGENT (default: claude --continue, or a fresh claude if there is none)
   -s          create or reattach the project's tmux session (edit, agent, shell)
   -d          with -s: create the session but don't attach
   -h          show this help
