@@ -23,9 +23,11 @@
 {{- end }}
 {{- if eq .chezmoi.os "darwin" }}
 	program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
-{{- else }}
+{{- else if contains "microsoft" (lower .chezmoi.kernel.osrelease) }}
 	# On WSL this is a wrapper in ~/.local/bin that forwards signing to op-ssh-sign.exe
 	program = "op-ssh-sign"
+{{- else }}
+	program = "/opt/1Password/op-ssh-sign"
 {{- end }}
 
 [init]
