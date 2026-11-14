@@ -1,20 +1,28 @@
 # Setup entries as a standard POSIX colon-separated list
-_entries="$HOME/.local/bin:${CARGO_HOME}/bin"
+_entries="$HOME/.local/bin${CARGO_HOME:+:$CARGO_HOME/bin}"
+mkdir -p "$HOME/.local/bin"
 
-_new_path=""
-IFS=:
-for dir in $_entries $PATH; do
-    [ -d "$dir" ] || continue
-    real="$(cd "$dir" 2>/dev/null && pwd -P)" || continue
-    case ":$_new_path:" in
-        *":$real:"*) ;;
-        *) _new_path="${_new_path:+$_new_path:}$dir" ;;
+_rest="$_entries:$PATH"
+_new_path=
+_seen=
+while [ -n "$_rest" ]; do
+    # Split on ":" with parameter expansion (zsh doesn't word-split $vars)
+    case $_rest in
+        *:*) _dir=${_rest%%:*}; _rest=${_rest#*:} ;;
+        *)   _dir=$_rest; _rest= ;;
+    esac
+    [ -n "$_dir" ] && [ -d "$_dir" ] || continue
+    # Dedupe on the symlink-resolved path, but keep the original entry
+    _real=$(cd "$_dir" 2>/dev/null && pwd -P) || continue
+    case ":$_seen:" in
+        *":$_real:"*) ;;
+        *)
+            _seen=${_seen:+$_seen:}$_real
+            _new_path=${_new_path:+$_new_path:}$_dir
+            ;;
     esac
 done
-unset IFS
 
-if [ -n "$_new_path" ]; then
-    PATH="$_new_path"
-fi
-unset _new_path _entries
+[ -n "$_new_path" ] && PATH=$_new_path
 export PATH
+unset _entries _rest _new_path _seen _dir _real

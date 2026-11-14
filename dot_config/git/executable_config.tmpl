@@ -21,8 +21,12 @@
 {{- if lookPath $onepasswordCmd }}
 	allowedSignersFile = ~/.config/git/allowed_signers
 {{- end }}
+{{- if eq .chezmoi.os "darwin" }}
+	program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+{{- else }}
 	# On WSL this is a wrapper in ~/.local/bin that forwards signing to op-ssh-sign.exe
 	program = "op-ssh-sign"
+{{- end }}
 
 [init]
 	defaultBranch = main
