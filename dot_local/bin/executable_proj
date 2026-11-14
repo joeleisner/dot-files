@@ -39,7 +39,7 @@ resolve_dir() {
 	elif [[ -d "$arg" ]]; then
 		(cd "$arg" && pwd -P)
 	elif command -v zoxide >/dev/null 2>&1 && found=$(zoxide query -- "$arg" 2>/dev/null); then
-		echo "$found"
+		(cd "$found" && pwd -P) || die "'$found' (from zoxide) is no longer a directory"
 	else
 		die "can't find a project called '$arg'"
 	fi
@@ -62,8 +62,8 @@ ensure_session() {
 	local name="$1" dir="$2"
 	tmux has-session -t "=$name" 2>/dev/null && return 0
 	tmux new-session -d -s "$name" -n edit -c "$dir" hx
-	# The agent window drops to a shell when the agent exits, so it isn't lost.
-	tmux new-window -t "=$name:" -n agent -c "$dir" "$PROJ_AGENT; exec \"\${SHELL:-bash}\""
+	# The agent window drops to a shell when the agent exits (even on Ctrl-C), so it isn't lost.
+	tmux new-window -t "=$name:" -n agent -c "$dir" "trap : INT; $PROJ_AGENT; trap - INT; exec \"\${SHELL:-bash}\""
 	tmux new-window -t "=$name:" -n shell -c "$dir"
 	tmux select-window -t "=$name:edit"
 }
