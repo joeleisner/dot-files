@@ -2,6 +2,7 @@
 brew "starship"
 brew "zoxide"
 brew "direnv"
+brew "fzf"
 
 # Environment & Runtime Manager
 brew "mise"
@@ -20,3 +21,7 @@ brew "socat"
 
 # Linking external projects into bashrc.d / config.d
 brew "stow"
+
+# Terminal Workspace
+brew "tmux"
+brew "helix"

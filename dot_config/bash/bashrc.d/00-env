@@ -24,6 +24,10 @@ export MISE_EXPERIMENTAL=true
 # Force NPM to respect XDG specifications
 export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
 
+# Default editor (Helix); an existing value wins
+export EDITOR="${EDITOR:-hx}"
+export VISUAL="${VISUAL:-hx}"
+
 # Ignore space-prefixed commands and duplicate entries in history
 export HISTCONTROL="ignorespace:ignoredups"
 
