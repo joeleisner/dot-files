@@ -16,7 +16,7 @@ My minimal, XDG-compliant, shell-impartial dot files + setup.
 5. WSL support
 6. 1Password-powered SSH agent and git commit signing
 7. Sensible SSH defaults, with `config.d` and `bashrc.d` as extension points
-8. Terminal workspace: tmux, Helix and a `proj` command (see below)
+8. Terminal workspace: herdr, Helix and a `proj` command (see below)
 
 ## Installation
 
@@ -37,30 +37,29 @@ Every `chezmoi apply` also checks the 1Password SSH agent socket (`~/.1password/
 
 ## Terminal workspace
 
-tmux, Helix (`hx`, the default `EDITOR`) and fzf (needed by zoxide's `zi`) are installed with the packages. `proj` ties them to your projects:
+Helix (`hx`, the default `EDITOR`) and fzf (needed by zoxide's `zi`) are installed with the packages, and herdr (a terminal multiplexer for coding agents) with mise. `proj` ties them to your projects:
 
 ```sh
 proj myapp       # cd to the project and run the agent there (resumes its last conversation, or starts one in a new project)
-proj -s myapp    # create or reattach myapp's tmux session: edit (hx), agent, shell
-proj -s -d myapp # same, but create it in the background without attaching
+proj -s myapp    # create or focus myapp's herdr workspace: tabs agent, edit (hx), shell
+proj -s -d myapp # same, but create it in the background without focusing it
 ```
 
-`myapp` is a directory or a name zoxide knows; leave it off to use the current directory. Sessions survive detaching, but not a reboot, and tmux never starts on its own.
+`myapp` is a directory or a name zoxide knows; leave it off to use the current directory. `proj -s` needs herdr and jq (herdr is installed through mise). Workspaces survive detaching, but not a reboot, and nothing starts on its own.
 
-### tmux cheat sheet
+### herdr cheat sheet
 
-The prefix is the tmux default, `Ctrl-b`. Press it, release, then:
+The prefix is herdr's default, `Ctrl-b`. Press it, release, then:
 
 | Keys | Does |
 | --- | --- |
-| `Ctrl-b d` | Detach (the session keeps running) |
-| `Ctrl-b \|` / `Ctrl-b -` | Split left/right / top/bottom |
-| `Ctrl-b c` | New window |
-| `Ctrl-b 1`–`9` | Go to window |
-| `Ctrl-b r` | Reload `~/.config/tmux/tmux.conf` |
-| `Ctrl-b ?` | List every key binding |
+| `q` | Detach (everything keeps running) |
+| `c` | New tab |
+| `1`–`9` / `n` / `p` | Go to tab / next tab / previous tab |
+| `w` | Pick a workspace |
+| `?` | List every key binding |
 
-From a shell, `tmux ls` lists sessions and `tmux attach` reattaches. In Helix, `:tutor` is a built-in walkthrough.
+From a shell, `herdr` reattaches and `herdr server stop` stops everything. In Helix, `:tutor` is a built-in walkthrough.
 
 ## Extending
 

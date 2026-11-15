@@ -23,5 +23,4 @@ brew "socat"
 brew "stow"
 
 # Terminal Workspace
-brew "tmux"
 brew "helix"
