@@ -18,7 +18,8 @@ usage() {
 Usage: proj [-s [-d]] [project]
 
   (no flags)  cd to the project and run $PROJ_AGENT (default: claude --continue, or a fresh claude if there is none)
-  -s          create or reattach the project's tmux session (edit, agent, shell)
+  -s          create or reattach the project's tmux session (edit, agent, shell;
+              the shell lists mise tasks if the project has a mise.toml)
   -d          with -s: create the session but don't attach
   -h          show this help
 
@@ -64,7 +65,12 @@ ensure_session() {
 	tmux new-session -d -s "$name" -n edit -c "$dir" hx
 	# The agent window drops to a shell when the agent exits (even on Ctrl-C), so it isn't lost.
 	tmux new-window -t "=$name:" -n agent -c "$dir" "trap : INT; $PROJ_AGENT; trap - INT; exec \"\${SHELL:-bash}\""
-	tmux new-window -t "=$name:" -n shell -c "$dir"
+	# The shell window lists the project's mise tasks first, if it has any.
+	if [[ -f "$dir/mise.toml" || -f "$dir/.mise.toml" ]] && command -v mise >/dev/null 2>&1; then
+		tmux new-window -t "=$name:" -n shell -c "$dir" "mise tasks; exec \"\${SHELL:-bash}\""
+	else
+		tmux new-window -t "=$name:" -n shell -c "$dir"
+	fi
 	tmux select-window -t "=$name:edit"
 }
 
