@@ -3,7 +3,7 @@ legacy_version_file=true
 
 [tools]
 bun = "latest"
-deno = "latest"
+go = "latest"
 node = "lts"
 pnpm = "latest"
 watchexec = "latest"
