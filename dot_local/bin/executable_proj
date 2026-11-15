@@ -3,8 +3,8 @@
 # proj: get into a project in one command.
 #
 #   proj [project]       cd to the project and run $PROJ_AGENT there
-#   proj -s [project]    create or reattach the project's tmux session
-#   proj -s -d [project] create the session without attaching
+#   proj -s [project]    create or focus the project's herdr workspace
+#   proj -s -d [project] create the workspace without focusing it
 #
 # "project" is a directory path, or a name zoxide knows. Defaults to the current
 # directory. PROJ_AGENT defaults to "claude --continue || claude".
@@ -18,9 +18,9 @@ usage() {
 Usage: proj [-s [-d]] [project]
 
   (no flags)  cd to the project and run $PROJ_AGENT (default: claude --continue, or a fresh claude if there is none)
-  -s          create or reattach the project's tmux session (edit, agent, shell;
+  -s          create or focus the project's herdr workspace (tabs: agent, edit, shell;
               the shell lists mise tasks if the project has a mise.toml)
-  -d          with -s: create the session but don't attach
+  -d          with -s: create the workspace but don't focus or attach
   -h          show this help
 
 project is a directory, or a name zoxide knows; defaults to the current directory.
@@ -46,40 +46,68 @@ resolve_dir() {
 	fi
 }
 
-# Print the tmux session name for a directory. tmux forbids '.' and ':' in names.
-# If a session of that name already belongs to a different directory, disambiguate.
-session_name() {
-	local dir="$1" base name
-	base=$(basename "$dir")
-	name="${base//[.:]/_}"
-	if tmux has-session -t "=$name" 2>/dev/null &&
-		[[ "$(tmux display-message -p -t "=$name:" '#{session_path}')" != "$dir" ]]; then
-		name="$name-$(printf %s "$dir" | cksum | cut -c1-4)"
+# Print the workspace label for a directory. If a workspace of that name already
+# belongs to a different directory, disambiguate.
+workspace_label() {
+	local dir="$1" label
+	label=$(basename "$dir")
+	if herdr workspace list | jq -e --arg l "$label" '.result.workspaces[] | select(.label == $l)' >/dev/null &&
+		[[ -z "$(find_workspace "$dir" "$label")" ]]; then
+		label="$label-$(printf %s "$dir" | cksum | cut -c1-4)"
 	fi
-	echo "$name"
+	echo "$label"
 }
 
-ensure_session() {
-	local name="$1" dir="$2"
-	tmux has-session -t "=$name" 2>/dev/null && return 0
-	tmux new-session -d -s "$name" -n edit -c "$dir" hx
-	# The agent window drops to a shell when the agent exits (even on Ctrl-C), so it isn't lost.
-	tmux new-window -t "=$name:" -n agent -c "$dir" "trap : INT; $PROJ_AGENT; trap - INT; exec \"\${SHELL:-bash}\""
-	# The shell window lists the project's mise tasks first, if it has any.
+# Print the id of the workspace that has a pane in the directory, if any.
+# With a label, only workspaces of that label count.
+find_workspace() {
+	local dir="$1" label="${2-}" id
+	while read -r id; do
+		[[ -z "$label" ]] && { echo "$id"; return; }
+		herdr workspace get "$id" | jq -e --arg l "$label" '.result.workspace | select(.label == $l)' >/dev/null && { echo "$id"; return; }
+	done < <(herdr pane list | jq -r --arg d "$dir" '.result.panes[] | select(.cwd == $d or .foreground_cwd == $d) | .workspace_id' | awk '!seen[$0]++')
+}
+
+# herdr's CLI talks to a running server; start one headless if there isn't one.
+ensure_server() {
+	herdr workspace list >/dev/null 2>&1 && return 0
+	(setsid nohup herdr server >/dev/null 2>&1 &)
+	for _ in $(seq 1 50); do
+		herdr workspace list >/dev/null 2>&1 && return 0
+		sleep 0.1
+	done
+	die "couldn't start the herdr server"
+}
+
+# Create the workspace (agent, edit, shell tabs) and print its id.
+create_workspace() {
+	local dir="$1" label="$2" ws wid pane agent_tab
+	ws=$(herdr workspace create --cwd "$dir" --label "$label" --no-focus)
+	wid=$(jq -r '.result.workspace.workspace_id' <<<"$ws")
+	pane=$(jq -r '.result.root_pane.pane_id' <<<"$ws")
+	agent_tab=$(jq -r '.result.tab.tab_id' <<<"$ws")
+
+	herdr tab rename "$agent_tab" agent >/dev/null
+	herdr pane run "$pane" "$PROJ_AGENT" >/dev/null
+
+	pane=$(herdr tab create --workspace "$wid" --cwd "$dir" --label edit --no-focus | jq -r '.result.root_pane.pane_id')
+	herdr pane run "$pane" hx >/dev/null
+
+	pane=$(herdr tab create --workspace "$wid" --cwd "$dir" --label shell --no-focus | jq -r '.result.root_pane.pane_id')
+	# The shell tab lists the project's mise tasks first, if it has any.
 	if [[ -f "$dir/mise.toml" || -f "$dir/.mise.toml" ]] && command -v mise >/dev/null 2>&1; then
-		tmux new-window -t "=$name:" -n shell -c "$dir" "mise tasks; exec \"\${SHELL:-bash}\""
-	else
-		tmux new-window -t "=$name:" -n shell -c "$dir"
+		herdr pane run "$pane" "mise tasks" >/dev/null
 	fi
-	tmux select-window -t "=$name:edit"
+	echo "$wid"
 }
 
-go_to_session() {
-	if [[ -n "${TMUX-}" ]]; then
-		tmux switch-client -t "=$1"
-	else
-		tmux attach-session -t "=$1"
-	fi
+go_to_workspace() {
+	local wid="$1" tab
+	herdr workspace focus "$wid" >/dev/null
+	tab=$(herdr tab list --workspace "$wid" | jq -r '.result.tabs[] | select(.label == "agent") | .tab_id' | head -n1)
+	[[ -z "$tab" ]] || herdr tab focus "$tab" >/dev/null
+	# Outside herdr, attach to the session; inside it, focusing was enough.
+	[[ "${HERDR_ENV-}" == 1 ]] || exec herdr
 }
 
 main() {
@@ -104,11 +132,13 @@ main() {
 		exec sh -c "$PROJ_AGENT"
 	fi
 
-	command -v tmux >/dev/null 2>&1 || die "tmux isn't installed"
-	local name
-	name=$(session_name "$dir")
-	ensure_session "$name" "$dir"
-	((detach == 1)) || go_to_session "$name"
+	command -v herdr >/dev/null 2>&1 || die "herdr isn't installed"
+	command -v jq >/dev/null 2>&1 || die "jq isn't installed"
+	ensure_server
+	local wid
+	wid=$(find_workspace "$dir")
+	[[ -n "$wid" ]] || wid=$(create_workspace "$dir" "$(workspace_label "$dir")")
+	((detach == 1)) || go_to_workspace "$wid"
 }
 
 main "$@"
