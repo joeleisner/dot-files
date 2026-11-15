@@ -3,7 +3,7 @@
 # proj: get into a project in one command.
 #
 #   proj [project]       cd to the project and run $PROJ_AGENT there
-#   proj -s [project]    create or focus the project's herdr workspace
+#   proj -s [project]    create or focus the project's herdr workspace (project can be a workspace name)
 #   proj -s -d [project] create the workspace without focusing it
 #
 # "project" is a directory path, or a name zoxide knows. Defaults to the current
@@ -24,6 +24,7 @@ Usage: proj [-s [-d]] [project]
   -h          show this help
 
 project is a directory, or a name zoxide knows; defaults to the current directory.
+With -s, the name of an existing herdr workspace also works (checked first).
 USAGE
 }
 
@@ -66,6 +67,13 @@ find_workspace() {
 		[[ -z "$label" ]] && { echo "$id"; return; }
 		herdr workspace get "$id" | jq -e --arg l "$label" '.result.workspace | select(.label == $l)' >/dev/null && { echo "$id"; return; }
 	done < <(herdr pane list | jq -r --arg d "$dir" '.result.panes[] | select(.cwd == $d or .foreground_cwd == $d) | .workspace_id' | awk '!seen[$0]++')
+}
+
+# Print the id of the workspace with exactly this label, if herdr is running and has one.
+# Never starts a server.
+find_workspace_by_label() {
+	herdr workspace list 2>/dev/null |
+		jq -r --arg l "$1" '[.result.workspaces[]? | select(.label == $l)][0].workspace_id // empty' 2>/dev/null || true
 }
 
 # herdr's CLI talks to a running server; start one headless if there isn't one.
@@ -124,7 +132,20 @@ main() {
 
 	((detach == 0 || session == 1)) || die "-d only makes sense with -s"
 
-	local dir
+	local dir wid=""
+	if ((session == 1)); then
+		command -v herdr >/dev/null 2>&1 || die "herdr isn't installed"
+		command -v jq >/dev/null 2>&1 || die "jq isn't installed"
+		# A workspace of that name wins over a directory, so a renamed workspace still opens.
+		if [[ -n "${1-}" ]]; then
+			wid=$(find_workspace_by_label "$1")
+			if [[ -n "$wid" ]]; then
+				((detach == 1)) || go_to_workspace "$wid"
+				return 0
+			fi
+		fi
+	fi
+
 	dir=$(resolve_dir "${1-}")
 
 	if ((session == 0)); then
@@ -132,10 +153,7 @@ main() {
 		exec sh -c "$PROJ_AGENT"
 	fi
 
-	command -v herdr >/dev/null 2>&1 || die "herdr isn't installed"
-	command -v jq >/dev/null 2>&1 || die "jq isn't installed"
 	ensure_server
-	local wid
 	wid=$(find_workspace "$dir")
 	[[ -n "$wid" ]] || wid=$(create_workspace "$dir" "$(workspace_label "$dir")")
 	((detach == 1)) || go_to_workspace "$wid"

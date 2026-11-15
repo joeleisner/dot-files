@@ -45,7 +45,7 @@ proj -s myapp    # create or focus myapp's herdr workspace: tabs agent, edit (hx
 proj -s -d myapp # same, but create it in the background without focusing it
 ```
 
-`myapp` is a directory or a name zoxide knows; leave it off to use the current directory. `proj -s` needs herdr and jq (herdr is installed through mise). Workspaces survive detaching, but not a reboot, and nothing starts on its own.
+`myapp` is a directory or a name zoxide knows; leave it off to use the current directory. With `-s` it can also be the name of an existing herdr workspace (checked first), so a renamed workspace still opens. `proj -s` needs herdr and jq (herdr is installed through mise). Workspaces survive detaching, but not a reboot, and nothing starts on its own.
 
 ### herdr cheat sheet
 
