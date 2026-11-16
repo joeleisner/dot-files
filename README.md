@@ -11,7 +11,7 @@ My minimal, XDG-compliant, shell-impartial dot files + setup.
 
 1. Works w/ Bash or ZSH
 2. Homebrew install
-3. Development dependencies and overrides
+3. Global CLI tools via Homebrew, and per-project runtimes via mise
 4. Terminal bling
 5. WSL support
 6. 1Password-powered SSH agent and git commit signing
@@ -37,7 +37,7 @@ Every `chezmoi apply` also checks the 1Password SSH agent socket (`~/.1password/
 
 ## Terminal workspace
 
-Helix (`hx`, the default `EDITOR`) and fzf (needed by zoxide's `zi`) are installed with the packages, and herdr (a terminal multiplexer for coding agents) with mise. `proj` ties them to your projects:
+Helix (`hx`, the default `EDITOR`), herdr (a terminal multiplexer for coding agents), jq and fzf (needed by zoxide's `zi`) are installed with the packages. `proj` runs Claude Code by default, which isn't installed automatically: run `mise run install-claude` (it uses Claude's native installer). `proj` ties them to your projects:
 
 ```sh
 proj myapp       # cd to the project and run the agent there (resumes its last conversation, or starts one in a new project)
@@ -45,7 +45,7 @@ proj -s myapp    # create or focus myapp's herdr workspace: tabs agent, edit (hx
 proj -s -d myapp # same, but create it in the background without focusing it
 ```
 
-`myapp` is a directory or a name zoxide knows; leave it off to use the current directory. With `-s` it can also be the name of an existing herdr workspace (checked first), so a renamed workspace still opens. `proj -s` needs herdr and jq (herdr is installed through mise). Workspaces survive detaching, but not a reboot, and nothing starts on its own.
+`myapp` is a directory or a name zoxide knows; leave it off to use the current directory. With `-s` it can also be the name of an existing herdr workspace (checked first), so a renamed workspace still opens. `proj -s` needs herdr and jq. Workspaces survive detaching, but not a reboot, and nothing starts on its own.
 
 ### herdr cheat sheet
 

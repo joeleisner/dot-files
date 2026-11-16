@@ -24,3 +24,7 @@ brew "stow"
 
 # Terminal Workspace
 brew "helix"
+brew "herdr"
+
+# JSON parsing (used by proj)
+brew "jq"
