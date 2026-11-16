@@ -16,3 +16,8 @@ if [ ${#MISSING_DEPS[@]} -ne 0 ]; then
 else
 	echo "✅️ Required dependencies already installed."
 fi
+
+# Soft check: proj's default agent, but not needed to apply these dot files
+if ! command -v claude &> /dev/null; then
+	echo "💡 Claude Code isn't installed (proj uses it). After setup, run: mise run install-claude"
+fi

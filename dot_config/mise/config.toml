@@ -4,7 +4,9 @@ legacy_version_file=true
 [tools]
 bun = "latest"
 go = "latest"
-herdr = "latest"
 node = "lts"
 pnpm = "latest"
-watchexec = "latest"
+
+[tasks.install-claude]
+description = "Install Claude Code with its native installer"
+run = "curl -fsSL https://claude.ai/install.sh | bash"
