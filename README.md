@@ -11,7 +11,7 @@ My minimal, XDG-compliant, shell-impartial dot files + setup.
 
 1. Works w/ Bash or ZSH
 2. Homebrew install
-3. Global CLI tools via Homebrew, and per-project runtimes via mise
+3. Global CLI tools via Homebrew, and per-project runtimes via mise (its global config is left untracked)
 4. Terminal bling
 5. WSL support
 6. 1Password-powered SSH agent and git commit signing
@@ -37,7 +37,7 @@ Every `chezmoi apply` also checks the 1Password SSH agent socket (`~/.1password/
 
 ## Terminal workspace
 
-Helix (`hx`, the default `EDITOR`), herdr (a terminal multiplexer for coding agents), jq and fzf (needed by zoxide's `zi`) are installed with the packages. `proj` runs Claude Code by default, which isn't installed automatically: run `mise run install-claude` (it uses Claude's native installer). `proj` ties them to your projects:
+Helix (`hx`, the default `EDITOR`), herdr (a terminal multiplexer for coding agents), jq and fzf (needed by zoxide's `zi`) are installed with the packages. `proj` runs Claude Code by default, which isn't installed automatically: install it with Claude's native installer (`curl -fsSL https://claude.ai/install.sh | bash`). `proj` ties them to your projects:
 
 ```sh
 proj myapp       # cd to the project and run the agent there (resumes its last conversation, or starts one in a new project)
