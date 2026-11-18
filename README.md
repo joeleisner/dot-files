@@ -16,7 +16,7 @@ My minimal, XDG-compliant, shell-impartial dot files + setup.
 5. WSL support
 6. 1Password-powered SSH agent and git commit signing
 7. Sensible SSH defaults, with `config.d` and `bashrc.d` as extension points
-8. Terminal workspace: herdr, Helix and a `proj` command (see below)
+8. Terminal workspace: Helix and a `proj` command for herdr (see below)
 
 ## Installation
 
@@ -37,7 +37,7 @@ Every `chezmoi apply` also checks the 1Password SSH agent socket (`~/.1password/
 
 ## Terminal workspace
 
-Helix (`hx`, the default `EDITOR`), herdr (a terminal multiplexer for coding agents), jq and fzf (needed by zoxide's `zi`) are installed with the packages. `proj` runs Claude Code by default, which isn't installed automatically: install it with Claude's native installer (`curl -fsSL https://claude.ai/install.sh | bash`). `proj` ties them to your projects:
+Helix (`hx`, the default `EDITOR`), jq and fzf (needed by zoxide's `zi`) are installed with the packages. herdr, a terminal multiplexer for coding agents, isn't: install either the terminal app (`brew install herdr`) or the desktop app, whichever you prefer. `proj` runs Claude Code by default, which isn't installed automatically: install it with Claude's native installer (`curl -fsSL https://claude.ai/install.sh | bash`). `proj` ties them to your projects:
 
 ```sh
 proj myapp       # cd to the project and run the agent there (resumes its last conversation, or starts one in a new project)
@@ -82,7 +82,7 @@ Set these in a `bashrc.d` file that sorts before the file that reads them (e.g. 
 
 ### Linking external projects
 
-[GNU Stow](https://www.gnu.org/software/stow/) is installed with the Brewfile. Use `--no-folding` so Stow links individual files instead of replacing a directory with one symlink, which would collide with the files the harness owns:
+[GNU Stow](https://www.gnu.org/software/stow/) (`brew install stow`) is a good way to link your own dotfiles in alongside this setup. Use `--no-folding` so Stow links individual files instead of replacing a directory with one symlink, which would collide with the files the harness owns:
 
 ```sh
 stow --no-folding -d ~/projects -t ~ work-servers   # e.g. ~/projects/work-servers/.ssh/config.d/50-work.conf

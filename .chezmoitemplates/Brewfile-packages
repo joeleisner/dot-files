@@ -19,12 +19,8 @@ brew "bash-preexec"
 # WSL + 1Password SSH Agent Relay
 brew "socat"
 
-# Linking external projects into bashrc.d / config.d
-brew "stow"
-
 # Terminal Workspace
 brew "helix"
-brew "herdr"
 
 # JSON parsing (used by proj)
 brew "jq"
