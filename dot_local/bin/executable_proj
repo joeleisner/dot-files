@@ -4,7 +4,10 @@
 #
 #   proj [project]       cd to the project and run $PROJ_AGENT there
 #   proj -s [project]    create or focus the project's herdr workspace (project can be a workspace name)
+#   proj -g [project]    same, in the Herdr desktop app (a "space" there)
 #   proj -s -d [project] create the workspace without focusing it
+#
+# PROJ_UI=gui makes -s mean -g; -t is -s that always uses the terminal herdr.
 #
 # "project" is a directory path, or a name zoxide knows. Defaults to the current
 # directory. PROJ_AGENT defaults to "claude --continue || claude".
@@ -15,16 +18,20 @@ set -euo pipefail
 
 usage() {
 	cat <<'USAGE'
-Usage: proj [-s [-d]] [project]
+Usage: proj [-s | -g | -t] [-d] [project]
 
   (no flags)  cd to the project and run $PROJ_AGENT (default: claude --continue, or a fresh claude if there is none)
   -s          create or focus the project's herdr workspace (tabs: agent, edit, shell;
               the shell lists mise tasks if the project has a mise.toml)
-  -d          with -s: create the workspace but don't focus or attach
+  -g          the same in the Herdr desktop app (spaces, same three tabs)
+  -t          the same in the terminal herdr (same as -s, even with PROJ_UI=gui)
+  -d          with -s/-g: create the workspace but don't focus or attach
   -h          show this help
 
+PROJ_UI=gui makes -s use the desktop app (default: tui).
+
 project is a directory, or a name zoxide knows; defaults to the current directory.
-With -s, the name of an existing herdr workspace also works (checked first).
+With -s/-g, the name of an existing workspace or space also works (checked first).
 USAGE
 }
 
@@ -49,11 +56,11 @@ resolve_dir() {
 
 # Print the workspace label for a directory. If a workspace of that name already
 # belongs to a different directory, disambiguate.
-workspace_label() {
+tui_label() {
 	local dir="$1" label
 	label=$(basename "$dir")
 	if herdr workspace list | jq -e --arg l "$label" '.result.workspaces[] | select(.label == $l)' >/dev/null &&
-		[[ -z "$(find_workspace "$dir" "$label")" ]]; then
+		[[ -z "$(tui_find_by_dir "$dir" "$label")" ]]; then
 		label="$label-$(printf %s "$dir" | cksum | cut -c1-4)"
 	fi
 	echo "$label"
@@ -61,7 +68,7 @@ workspace_label() {
 
 # Print the id of the workspace that has a pane in the directory, if any.
 # With a label, only workspaces of that label count.
-find_workspace() {
+tui_find_by_dir() {
 	local dir="$1" label="${2-}" id
 	while read -r id; do
 		[[ -z "$label" ]] && { echo "$id"; return; }
@@ -71,13 +78,13 @@ find_workspace() {
 
 # Print the id of the workspace with exactly this label, if herdr is running and has one.
 # Never starts a server.
-find_workspace_by_label() {
+tui_find_by_label() {
 	herdr workspace list 2>/dev/null |
 		jq -r --arg l "$1" '[.result.workspaces[]? | select(.label == $l)][0].workspace_id // empty' 2>/dev/null || true
 }
 
 # herdr's CLI talks to a running server; start one headless if there isn't one.
-ensure_server() {
+tui_ensure() {
 	herdr workspace list >/dev/null 2>&1 && return 0
 	(setsid nohup herdr server >/dev/null 2>&1 &)
 	for _ in $(seq 1 50); do
@@ -88,7 +95,7 @@ ensure_server() {
 }
 
 # Create the workspace (agent, edit, shell tabs) and print its id.
-create_workspace() {
+tui_create() {
 	local dir="$1" label="$2" ws wid pane agent_tab
 	ws=$(herdr workspace create --cwd "$dir" --label "$label" --no-focus)
 	wid=$(jq -r '.result.workspace.workspace_id' <<<"$ws")
@@ -109,7 +116,7 @@ create_workspace() {
 	echo "$wid"
 }
 
-go_to_workspace() {
+tui_focus() {
 	local wid="$1" tab
 	herdr workspace focus "$wid" >/dev/null
 	tab=$(herdr tab list --workspace "$wid" | jq -r '.result.tabs[] | select(.label == "agent") | .tab_id' | head -n1)
@@ -118,11 +125,74 @@ go_to_workspace() {
 	[[ "${HERDR_ENV-}" == 1 ]] || exec herdr
 }
 
+# ---- Herdr desktop app (herdr-app drives the window; hc runs the terminals) ----
+
+gui_find_by_label() {
+	herdr-app ls 2>/dev/null |
+		jq -r --arg l "$1" '[.spaces[]? | select(.name == $l)][0].id // empty' 2>/dev/null || true
+}
+
+# A space's folder is where its first terminal started, so only spaces made by proj match.
+gui_find_by_dir() {
+	herdr-app ls 2>/dev/null |
+		jq -r --arg d "$1" '[.spaces[]? | select(.folder == $d)][0].id // empty' 2>/dev/null || true
+}
+
+gui_label() {
+	local dir="$1" label
+	label=$(basename "$dir")
+	if [[ -n "$(gui_find_by_label "$label")" ]]; then
+		label="$label-$(printf %s "$dir" | cksum | cut -c1-4)"
+	fi
+	echo "$label"
+}
+
+# The app has to be open for herdr-app to reach it; open it (behind everything for -d).
+gui_ensure() {
+	herdr-app ls >/dev/null 2>&1 && return 0
+	command -v open >/dev/null 2>&1 || die "the Herdr app isn't running"
+	if ((detach == 1)); then open -g -a Herdr; else open -a Herdr; fi
+	for _ in $(seq 1 100); do
+		herdr-app ls >/dev/null 2>&1 && return 0
+		sleep 0.1
+	done
+	die "couldn't reach the Herdr app"
+}
+
+# argv runs the program directly (inside a login shell that survives it), so wrap commands in sh -c.
+shargv() { jq -nc --arg c "$1" '["sh","-c",$c]'; }
+
+# Create the space (agent, edit, shell tabs) and print its id.
+gui_create() {
+	local dir="$1" label="$2" out sid
+	out=$(herdr-app do space.new --name "$label" --folder "$dir" --tab agent --argv "$(shargv "$PROJ_AGENT")" --focus false) ||
+		die "couldn't create the space: $out"
+	sid=$(jq -r '.space' <<<"$out")
+	herdr-app do tab.new --space "$sid" --name edit --folder "$dir" --argv '["hx"]' --focus false >/dev/null
+	if [[ -f "$dir/mise.toml" || -f "$dir/.mise.toml" ]] && command -v mise >/dev/null 2>&1; then
+		herdr-app do tab.new --space "$sid" --name shell --folder "$dir" --argv "$(shargv "mise tasks")" --focus false >/dev/null
+	else
+		herdr-app do tab.new --space "$sid" --name shell --folder "$dir" --focus false >/dev/null
+	fi
+	echo "$sid"
+}
+
+gui_focus() {
+	local sid="$1" tab
+	herdr-app do space.select --id "$sid" >/dev/null
+	tab=$(herdr-app ls | jq -r --arg s "$sid" '.spaces[] | select(.id == $s) | .tabs[] | select(.name == "agent") | .id' | head -n1)
+	[[ -z "$tab" ]] || herdr-app do tab.select --id "$tab" >/dev/null
+	# Outside the app, bring its window forward.
+	[[ -n "${HC_TERMINAL_ID-}" ]] || ! command -v open >/dev/null 2>&1 || open -a Herdr
+}
+
 main() {
-	local session=0 detach=0 opt
-	while getopts "sdh" opt; do
+	local session=0 detach=0 opt ui="${PROJ_UI:-tui}"
+	while getopts "sgtdh" opt; do
 		case "$opt" in
 			s) session=1 ;;
+			g) session=1; ui=gui ;;
+			t) session=1; ui=tui ;;
 			d) detach=1 ;;
 			h) usage; exit 0 ;;
 			*) usage >&2; exit 2 ;;
@@ -130,17 +200,22 @@ main() {
 	done
 	shift $((OPTIND - 1))
 
-	((detach == 0 || session == 1)) || die "-d only makes sense with -s"
+	case "$ui" in tui | gui) ;; *) die "PROJ_UI must be tui or gui, not '$ui'" ;; esac
+	((detach == 0 || session == 1)) || die "-d only makes sense with -s or -g"
 
 	local dir wid=""
 	if ((session == 1)); then
-		command -v herdr >/dev/null 2>&1 || die "herdr isn't installed"
 		command -v jq >/dev/null 2>&1 || die "jq isn't installed"
+		if [[ "$ui" == gui ]]; then
+			command -v herdr-app >/dev/null 2>&1 || die "herdr-app isn't installed"
+		else
+			command -v herdr >/dev/null 2>&1 || die "herdr isn't installed"
+		fi
 		# A workspace of that name wins over a directory, so a renamed workspace still opens.
 		if [[ -n "${1-}" ]]; then
-			wid=$(find_workspace_by_label "$1")
+			wid=$("${ui}_find_by_label" "$1")
 			if [[ -n "$wid" ]]; then
-				((detach == 1)) || go_to_workspace "$wid"
+				((detach == 1)) || "${ui}_focus" "$wid"
 				return 0
 			fi
 		fi
@@ -153,10 +228,10 @@ main() {
 		exec sh -c "$PROJ_AGENT"
 	fi
 
-	ensure_server
-	wid=$(find_workspace "$dir")
-	[[ -n "$wid" ]] || wid=$(create_workspace "$dir" "$(workspace_label "$dir")")
-	((detach == 1)) || go_to_workspace "$wid"
+	"${ui}_ensure"
+	wid=$("${ui}_find_by_dir" "$dir")
+	[[ -n "$wid" ]] || wid=$("${ui}_create" "$dir" "$("${ui}_label" "$dir")")
+	((detach == 1)) || "${ui}_focus" "$wid"
 }
 
 main "$@"

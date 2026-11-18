@@ -42,10 +42,11 @@ Helix (`hx`, the default `EDITOR`), herdr (a terminal multiplexer for coding age
 ```sh
 proj myapp       # cd to the project and run the agent there (resumes its last conversation, or starts one in a new project)
 proj -s myapp    # create or focus myapp's herdr workspace: tabs agent, edit (hx), shell
+proj -g myapp    # the same in the Herdr desktop app (a "space" there)
 proj -s -d myapp # same, but create it in the background without focusing it
 ```
 
-`myapp` is a directory or a name zoxide knows; leave it off to use the current directory. With `-s` it can also be the name of an existing herdr workspace (checked first), so a renamed workspace still opens. `proj -s` needs herdr and jq. Workspaces survive detaching, but not a reboot, and nothing starts on its own.
+`myapp` is a directory or a name zoxide knows; leave it off to use the current directory. With `-s` it can also be the name of an existing herdr workspace (checked first), so a renamed workspace still opens. `proj -s` needs herdr and jq; `proj -g` needs the Herdr app (it opens it if needed) and jq. Set `PROJ_UI=gui` to make `-s` use the app, and use `-t` (`-s` that always means the terminal herdr) to override it. Spaces you made by hand open by name, but only ones `proj` made match by directory. Workspaces survive detaching, but not a reboot, and nothing starts on its own.
 
 ### herdr cheat sheet
 
@@ -76,6 +77,7 @@ Set these in a `bashrc.d` file that sorts before the file that reads them (e.g. 
 
 - `ZOXIDE_CMD`: the command zoxide defines. Defaults to `z`; `ZOXIDE_CMD=cd` makes `cd` smart instead (and `z` is no longer defined). Note that `cd -P`/`cd -L` don't work with it, and a mistyped directory jumps to a frequent match instead of failing. In non-interactive shells (agent shells such as Claude Code, scripts that source your config) `cd` stays the plain builtin, so a typo fails instead of jumping and zoxide's prompt-hook check never warns.
 - `EDITOR`/`VISUAL`: set to `hx` unconditionally, because distros pre-set `EDITOR` (Fedora sets nano) so a "keep any existing value" guard never fires. Export your own in a file that sorts after `00-env` (e.g. `50-editor`) to change them.
+- `PROJ_UI`: `tui` (default) or `gui`: which herdr `proj -s` uses. `-g` and `-t` each imply `-s` and override it per run.
 - `PROJ_AGENT`: (must be `export`ed, since `proj` is a separate process) the command `proj` runs as the agent, in light mode and in the session's `agent` window. Defaults to `claude --continue || claude` (resume the last conversation, or start a fresh one in a new project).
 
 ### Linking external projects
