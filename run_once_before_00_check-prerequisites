@@ -19,5 +19,5 @@ fi
 
 # Soft check: proj's default agent, but not needed to apply these dot files
 if ! command -v claude &> /dev/null; then
-	echo "💡 Claude Code isn't installed (proj uses it). After setup, run: mise run install-claude"
+	echo "💡 Claude Code isn't installed (proj uses it). After setup, run: curl -fsSL https://claude.ai/install.sh | bash"
 fi
